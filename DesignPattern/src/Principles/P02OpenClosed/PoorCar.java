@@ -1,4 +1,4 @@
-package Principles.P02OpenClose;
+package Principles.P02OpenClosed;
 
 public class PoorCar {
     /**
@@ -12,15 +12,10 @@ public class PoorCar {
     public BeepSound beepSound  ;
 
     public void beep() {
-        switch(beepSound) {
-            case BeepSound:
-                System.out.println("Beep Beep!");
-                break;
-            case BooSound:
-                System.out.println("Boo Boo!");
-                break;
-            default :
-                System.out.println("------!");
+        switch (beepSound) {
+            case BeepSound -> System.out.println("Beep Beep!");
+            case BooSound -> System.out.println("Boo Boo!");
+            default -> System.out.println("------!");
         }
     }
 

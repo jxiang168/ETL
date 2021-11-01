@@ -1,5 +1,5 @@
 # 单一职责原则
-
+> A class should have one and only one reason to change, meaning that a class should have only one job.
 ## 定义
 一个类只负责一件事情。分解类以降低耦合与修改成本。
 
