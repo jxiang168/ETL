@@ -34,8 +34,8 @@ class BuuBeeper {
     void beep()
 }
 
-Beepable <|-- BeepBeeper
-Beepable <|-- BuuBeeper
+Beepable <|.. BeepBeeper
+Beepable <|.. BuuBeeper
 Car *-- Beepable
 
 @enduml
