@@ -1,4 +1,4 @@
-package Principles.P02OpenClose;
+package Principles.P02OpenClosed;
 
 public class GoodCar {
     /**
@@ -8,10 +8,10 @@ public class GoodCar {
     public Beepable beeper;
     public void beep() {
         this.beeper.beep();
-    };
+    }
 
     interface Beepable {
-        public void beep();
+        void beep();
     }
 
     class BeepBeeper implements Beepable {

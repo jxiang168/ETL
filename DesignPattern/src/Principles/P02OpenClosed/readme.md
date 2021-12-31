@@ -1,4 +1,6 @@
 # 开闭原则
+> Objects or entities should be open for extension but closed for modification.
+
 对扩展开放，对修改关闭
 
 修改前
@@ -34,8 +36,8 @@ class BuuBeeper {
     void beep()
 }
 
-Beepable <|-- BeepBeeper
-Beepable <|-- BuuBeeper
+Beepable <|.. BeepBeeper
+Beepable <|.. BuuBeeper
 Car *-- Beepable
 
 @enduml
