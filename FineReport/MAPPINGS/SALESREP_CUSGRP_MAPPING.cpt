@@ -1,0 +1,686 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WorkBook xmlVersion="20170720" releaseVersion="10.0.0">
+<TableDataMap>
+<TableData name="main" class="com.fr.data.impl.DBTableData">
+<Parameters>
+<Parameter>
+<Attributes name="l_fcst_rep_id"/>
+<O>
+<![CDATA[1001]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_cusgrp_name"/>
+<O>
+<![CDATA[]]></O>
+</Parameter>
+</Parameters>
+<Attributes maxMemRowCount="-1"/>
+<Connection class="com.fr.data.impl.NameDatabaseConnection">
+<DatabaseName>
+<![CDATA[HCP_DM]]></DatabaseName>
+</Connection>
+<Query>
+<![CDATA[select esr.SUB_CUSTOMER_GROUP, esr.CUSTOMER_GROUP, esr.SENIOR_CUSTOMER_GROUP, esr.OVERSEA_CODE
+, cast( 1 as bit) as checked 
+,esr.DEFAULT_FLAG, esr.ASSIGN_ID
+,1 as odb1, (case when esr.SUB_CUSTOMER_GROUP like 'Mold%' then 2 when esr.SUB_CUSTOMER_GROUP like '%Other%' then 3 else 1 end ) as odb2
+from HCPDW.dbo.DIM_SALESREP_CUSTOMER_V esr
+where 1=1
+and esr.FCST_SALESREP_ID = '${l_fcst_rep_id}'
+union all
+select cgm.SUB_CUSTOMER_GROUP, cgm.CUSTOMER_GROUP, cgm.SENIOR_CUSTOMER_GROUP, cgm.OVERSEA_CODE
+, cast( 0 as bit) as checked 
+, cast( 0 as bit) as DEFAULT_FLAG ,null as ASSIGN_ID
+,2 as odb1,(case when cgm.SUB_CUSTOMER_GROUP like 'Mold%' then 2 when cgm.SUB_CUSTOMER_GROUP like '%Other%' then 3 else 1 end ) as odb2
+from HCPDW.dbo.DIM_XLS_CUSTOMER_GROUP_MAPPING cgm
+where 1=1
+and not exists(
+-- exclude director not other
+select 1 from HCPDW.dbo.DIM_EBS_SALESREPS_V s1
+inner join HCPDW.dbo.DIM_EBS_SALESREPS_V s2 on s2.SALES_DIRECTOR = s1.SALES_DIRECTOR and s2.COMPANY = s1.COMPANY
+inner join HCPDW.dbo.DIM_SALESREP_CUSTOMER_V c on c.FCST_SALESREP_ID = s2.FCST_SALESREP_ID 
+where 1=1
+and s1.FCST_SALESREP_ID = '${l_fcst_rep_id}'
+${if(len(p_cusgrp_name)=0,"","and cgm.SUB_CUSTOMER_GROUP like '%"+p_cusgrp_name+"%'")}
+and c.SUB_CUSTOMER_GROUP = cgm.SUB_CUSTOMER_GROUP
+and (c.SUB_CUSTOMER_GROUP not like 'Other%' and c.SUB_CUSTOMER_GROUP not like 'Mold%')
+-- exclude self other
+union all
+select 1 from HCPDW.dbo.DIM_SALESREP_CUSTOMER_V sc
+where 1=1
+and sc.FCST_SALESREP_ID = '${l_fcst_rep_id}'
+and sc.SUB_CUSTOMER_GROUP = cgm.SUB_CUSTOMER_GROUP
+and (sc.SUB_CUSTOMER_GROUP like 'Other%' or sc.SUB_CUSTOMER_GROUP like 'Mold%')
+)
+order by odb1, odb2,  SUB_CUSTOMER_GROUP	]]></Query>
+<PageQuery>
+<![CDATA[]]></PageQuery>
+</TableData>
+<TableData name="DIC_FCST_REP" class="com.fr.data.impl.DBTableData">
+<Parameters>
+<Parameter>
+<Attributes name="l_fcst_rep_id"/>
+<O>
+<![CDATA[1001]]></O>
+</Parameter>
+</Parameters>
+<Attributes maxMemRowCount="-1"/>
+<Connection class="com.fr.data.impl.NameDatabaseConnection">
+<DatabaseName>
+<![CDATA[HCP_DM]]></DatabaseName>
+</Connection>
+<Query>
+<![CDATA[select srp.FCST_SALESREP_ID, srp.FCST_SALES_REP
+from HCPDW.dbo.DIM_FCST_SALESREPS srp
+where 1=1
+and srp.FCST_SALESREP_ID = '${l_fcst_rep_id}']]></Query>
+<PageQuery>
+<![CDATA[]]></PageQuery>
+</TableData>
+</TableDataMap>
+<ReportWebAttr>
+<ServerPrinter/>
+<WebWriteContent>
+<Listener event="writesuccess">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters/>
+<Content>
+<![CDATA[setTimeout(function() {
+	location.reload();
+}, 500);]]></Content>
+</JavaScript>
+</Listener>
+<ToolBars/>
+<EditRowColor setColor="false"/>
+<WebWrite SheetPosition="3"/>
+<RptLocation isShowAtLeft="true"/>
+<UnloadCheck/>
+<ShowWidgets/>
+<OtherAttr autoStash="false"/>
+</WebWriteContent>
+</ReportWebAttr>
+<ElementCaseMobileAttr>
+<ElementCaseMobileAttrProvider horizontal="1" vertical="1" zoom="true" refresh="false" isUseHTML="false" isMobileCanvasSize="false" appearRefresh="false" allowFullScreen="false" allowDoubleClickOrZoom="true" functionalWhenUnactivated="false"/>
+</ElementCaseMobileAttr>
+<Report class="com.fr.report.worksheet.WorkSheet" name="sheet1">
+<ReportPageAttr>
+<HR/>
+<FR/>
+<HC/>
+<FC/>
+</ReportPageAttr>
+<ColumnPrivilegeControl/>
+<RowPrivilegeControl/>
+<RowHeight defaultValue="723900">
+<![CDATA[330200,723900,723900,1943100,864000,723900,723900,723900,723900,723900,723900,723900]]></RowHeight>
+<ColumnWidth defaultValue="2743200">
+<![CDATA[457200,1651000,3479800,2971800,2692400,2692400,1498600,2743200,685800,2743200,2743200,2743200,2743200]]></ColumnWidth>
+<CellElementList>
+<C c="0" r="0">
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="0" r="1">
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[hide-row]]></Name>
+<Condition class="com.fr.data.condition.ListCondition"/>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.RowHeightHighlightAction"/>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="1" r="1">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=now()]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="2" r="1">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=$fine_username]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="3" r="1">
+<O t="DSColumn">
+<Attributes dsName="DIC_FCST_REP" columnName="FCST_SALESREP_ID"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="1" r="2" cs="2" s="0">
+<O>
+<![CDATA[FCST Salesrep:   ]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="3" r="2" cs="2" s="1">
+<O t="DSColumn">
+<Attributes dsName="DIC_FCST_REP" columnName="FCST_SALES_REP"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="1" r="3" s="2">
+<O>
+<![CDATA[Check]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="2" r="3" s="2">
+<O>
+<![CDATA[Sub Customer Group]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="3" r="3" s="2">
+<O>
+<![CDATA[Customer Group]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="4" r="3" s="2">
+<O>
+<![CDATA[Senior Customer Group]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="5" r="3" s="2">
+<O>
+<![CDATA[Oversea Code]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="6" r="3" s="2">
+<O>
+<![CDATA[Default]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="7" r="3">
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[hide-col]]></Name>
+<Condition class="com.fr.data.condition.ListCondition"/>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.ColWidthHighlightAction"/>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="1" r="4" s="3">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="checked"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper">
+<Attr divideMode="1"/>
+</RG>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="2" showAsDefault="true"/>
+<CellPageAttr/>
+<Widget class="com.fr.form.ui.CheckBox">
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false"/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[]]></Text>
+<Hotkeys>
+<![CDATA[]]></Hotkeys>
+<widgetValue>
+<O t="B">
+<![CDATA[false]]></O>
+</widgetValue>
+</Widget>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[row-color]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[row() % 2 = 1]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Scope val="1"/>
+<Background name="ColorBackground" color="-917761"/>
+</HighlightAction>
+</Highlight>
+</HighlightList>
+<Expand dir="0"/>
+</C>
+<C c="2" r="4" s="4">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="SUB_CUSTOMER_GROUP"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="2"/>
+<CellPageAttr/>
+<Expand dir="0"/>
+</C>
+<C c="3" r="4" s="4">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="CUSTOMER_GROUP"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="2"/>
+<CellPageAttr/>
+<Expand dir="0"/>
+</C>
+<C c="4" r="4" s="4">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="SENIOR_CUSTOMER_GROUP"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="2"/>
+<CellPageAttr/>
+<Expand dir="0"/>
+</C>
+<C c="5" r="4" s="4">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="OVERSEA_CODE"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="2"/>
+<CellPageAttr/>
+<Expand dir="0"/>
+</C>
+<C c="6" r="4" s="3">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="DEFAULT_FLAG"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper">
+<Attr divideMode="1"/>
+</RG>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="2" showAsDefault="true"/>
+<CellPageAttr/>
+<Widget class="com.fr.form.ui.CheckBox">
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false"/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[]]></Text>
+<Hotkeys>
+<![CDATA[]]></Hotkeys>
+<widgetValue>
+<O t="B">
+<![CDATA[false]]></O>
+</widgetValue>
+</Widget>
+<Expand dir="0"/>
+</C>
+<C c="7" r="4">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="ASSIGN_ID"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="0" r="5">
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[hide-row]]></Name>
+<Condition class="com.fr.data.condition.ListCondition"/>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.RowHeightHighlightAction"/>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="6" r="5">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=sum(g5)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="8" r="6" s="5">
+<PrivilegeControl/>
+<Expand/>
+</C>
+</CellElementList>
+<ReportAttrSet>
+<ReportSettings shrinkToFitMode="0" headerHeight="0" footerHeight="0">
+<FrozenColumnRow columnrow="A5"/>
+<PaperSetting>
+<Margin top="986400" left="2743200" bottom="986400" right="2743200"/>
+</PaperSetting>
+<Background name="ColorBackground" color="-1"/>
+</ReportSettings>
+<Header reportPageType="0">
+<Background name="NullBackground"/>
+<LeftList/>
+<CenterList/>
+<RightList/>
+</Header>
+<Footer reportPageType="0">
+<Background name="NullBackground"/>
+<LeftList/>
+<CenterList/>
+<RightList/>
+</Footer>
+</ReportAttrSet>
+<ReportWriteAttr>
+<SubmitVisitor class="com.fr.report.write.BuiltInSQLSubmiter">
+<Name>
+<![CDATA[insert]]></Name>
+<Attributes dsName="HCP_DW"/>
+<DMLConfig class="com.fr.write.config.InsertConfig">
+<Table schema="dbo" name="DIM_FCST_SUBGRP_ASSIGN"/>
+<ColumnConfig name="FCST_SALESREP_ID" isKey="true" skipUnmodified="false">
+<ColumnRow column="3" row="1"/>
+</ColumnConfig>
+<ColumnConfig name="UPDATE_DATETIME" isKey="false" skipUnmodified="false">
+<ColumnRow column="1" row="1"/>
+</ColumnConfig>
+<ColumnConfig name="UPDATE_BY" isKey="false" skipUnmodified="false">
+<ColumnRow column="2" row="1"/>
+</ColumnConfig>
+<ColumnConfig name="DEFAULT_FLAG" isKey="false" skipUnmodified="false">
+<ColumnRow column="6" row="4"/>
+</ColumnConfig>
+<ColumnConfig name="SUB_CUSTOMER_GROUP" isKey="true" skipUnmodified="false">
+<ColumnRow column="2" row="4"/>
+</ColumnConfig>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[len(H5) = 0 && B5 = true]]></Formula>
+</Condition>
+</DMLConfig>
+</SubmitVisitor>
+<SubmitVisitor class="com.fr.report.write.BuiltInSQLSubmiter">
+<Name>
+<![CDATA[delete]]></Name>
+<Attributes dsName="HCP_DW"/>
+<DMLConfig class="com.fr.write.config.DeleteConfig">
+<Table schema="dbo" name="DIM_FCST_SUBGRP_ASSIGN"/>
+<ColumnConfig name="ASSIGN_ID" isKey="true" skipUnmodified="false">
+<ColumnRow column="7" row="4"/>
+</ColumnConfig>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[len(H5) > 0 && B5 = false]]></Formula>
+</Condition>
+</DMLConfig>
+</SubmitVisitor>
+<SubmitVisitor class="com.fr.report.write.BuiltInSQLSubmiter">
+<Name>
+<![CDATA[update]]></Name>
+<Attributes dsName="HCP_DW"/>
+<DMLConfig class="com.fr.write.config.UpdateConfig">
+<Table schema="dbo" name="DIM_FCST_SUBGRP_ASSIGN"/>
+<ColumnConfig name="ASSIGN_ID" isKey="true" skipUnmodified="false">
+<ColumnRow column="7" row="4"/>
+</ColumnConfig>
+<ColumnConfig name="DEFAULT_FLAG" isKey="false" skipUnmodified="false">
+<ColumnRow column="6" row="4"/>
+</ColumnConfig>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[len(H5) > 0 && B5 = true]]></Formula>
+</Condition>
+<UpdateAttr updateStatus="true"/>
+</DMLConfig>
+</SubmitVisitor>
+<TopVerifier class="com.fr.report.write.ValueVerifier">
+<name>
+<![CDATA[内置校验1]]></name>
+<VerifyItem class="com.fr.data.VerifyItem">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=G6 = 1]]></Attributes>
+</O>
+<message>
+<![CDATA[="There must be one and only one default sub customer group."]]></message>
+</VerifyItem>
+</TopVerifier>
+</ReportWriteAttr>
+<PrivilegeControl/>
+</Report>
+<ReportParameterAttr>
+<Attributes showWindow="true" delayPlaying="false" windowPosition="1" align="0" useParamsTemplate="false" currentIndex="0"/>
+<PWTitle>
+<![CDATA[参数]]></PWTitle>
+<ParameterUI class="com.fr.form.main.parameter.FormParameterUI">
+<Parameters/>
+<Layout class="com.fr.form.ui.container.WParameterLayout">
+<WidgetName name="para"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false"/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Margin top="0" left="0" bottom="0" right="0"/>
+<Border>
+<border style="0" color="-723724" borderRadius="0" type="0" borderStyle="0"/>
+<WidgetTitle>
+<O>
+<![CDATA[新建标题]]></O>
+<FRFont name="SimSun" style="0" size="72"/>
+<Position pos="0"/>
+</WidgetTitle>
+<Alpha alpha="1.0"/>
+</Border>
+<Background name="ColorBackground" color="-526086"/>
+<LCAttr vgap="0" hgap="0" compInterval="0"/>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.FreeButton">
+<Listener event="click" name="点击1">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters/>
+<Content>
+<![CDATA[window.close();]]></Content>
+</JavaScript>
+</Listener>
+<WidgetName name="Save_c"/>
+<WidgetID widgetID="2ceb3478-2a2f-4d5d-8ecf-64cf2b8b1778"/>
+<WidgetAttr disabled="true" invisible="true" aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false"/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[Cancel]]></Text>
+<Hotkeys>
+<![CDATA[]]></Hotkeys>
+</InnerWidget>
+<BoundsAttr x="406" y="6" width="80" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.FreeButton">
+<Listener event="click" name="点击1">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters/>
+<Content>
+<![CDATA[FR.showLoadingDialog();
+
+setTimeout(function() {
+	_g().verifyAndWriteReport();
+}, 200);]]></Content>
+</JavaScript>
+</Listener>
+<WidgetName name="Save"/>
+<WidgetID widgetID="2ceb3478-2a2f-4d5d-8ecf-64cf2b8b1778"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false"/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[Save]]></Text>
+<Hotkeys>
+<![CDATA[]]></Hotkeys>
+</InnerWidget>
+<BoundsAttr x="316" y="6" width="80" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.parameter.FormSubmitButton">
+<WidgetName name="Search"/>
+<LabelName name="EBS Salesrep Name: "/>
+<WidgetID widgetID="c8267ecc-59ac-484b-be19-4ce9e4fea72f"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false"/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[Search]]></Text>
+<Hotkeys>
+<![CDATA[enter]]></Hotkeys>
+</InnerWidget>
+<BoundsAttr x="226" y="6" width="80" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.Label">
+<WidgetName name="label0"/>
+<WidgetID widgetID="902b3bfa-34e2-4cbc-8a5a-4f208e00e076"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false"/>
+<PrivilegeControl/>
+</WidgetAttr>
+<widgetValue>
+<O>
+<![CDATA[Sub Customer Group: ]]></O>
+</widgetValue>
+<LabelAttr verticalcenter="true" textalign="4" autoline="true"/>
+<FRFont name="微软雅黑" style="0" size="72"/>
+<border style="0" color="-723724"/>
+</InnerWidget>
+<BoundsAttr x="0" y="6" width="130" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.TextEditor">
+<WidgetName name="p_rep_name"/>
+<LabelName name="EBS Salesrep Name: "/>
+<WidgetID widgetID="aaa094ce-50fe-405c-8683-7764128eecfe"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false"/>
+<PrivilegeControl/>
+</WidgetAttr>
+<TextAttr/>
+<Reg class="com.fr.form.ui.reg.NoneReg"/>
+<widgetValue>
+<O>
+<![CDATA[]]></O>
+</widgetValue>
+<MobileScanCodeAttr scanCode="true" textInputMode="0"/>
+</InnerWidget>
+<BoundsAttr x="130" y="6" width="85" height="21"/>
+</Widget>
+<ShowBookmarks showBookmarks="false"/>
+<Sorted sorted="false"/>
+<MobileWidgetList>
+<Widget widgetName="p_rep_name"/>
+<Widget widgetName="Search"/>
+<Widget widgetName="Save"/>
+<Widget widgetName="Save_c"/>
+</MobileWidgetList>
+<FrozenWidgets/>
+<MobileBookMarkStyle class="com.fr.form.ui.mobile.impl.DefaultMobileBookMarkStyle"/>
+<Display display="true"/>
+<DelayDisplayContent delay="false"/>
+<UseParamsTemplate use="false"/>
+<Position position="0"/>
+<Design_Width design_width="486"/>
+<NameTagModified>
+<TagModified tag="p_rep_name" modified="true"/>
+<TagModified tag="Search" modified="true"/>
+</NameTagModified>
+<WidgetNameTagMap>
+<NameTag name="p_rep_name" tag="EBS Salesrep Name: "/>
+<NameTag name="Search" tag="EBS Salesrep Name: "/>
+</WidgetNameTagMap>
+<ParamAttr class="com.fr.report.mobile.DefaultMobileParamStyle"/>
+<ParamStyle class="com.fr.form.ui.mobile.impl.DefaultMobileParameterStyle"/>
+</Layout>
+<DesignAttr width="486" height="30"/>
+</ParameterUI>
+</ReportParameterAttr>
+<StyleList>
+<Style horizontal_alignment="4" imageLayout="1">
+<FRFont name="微软雅黑" style="1" size="72"/>
+<Background name="NullBackground"/>
+<Border/>
+</Style>
+<Style horizontal_alignment="2" imageLayout="1">
+<FRFont name="微软雅黑" style="1" size="72"/>
+<Background name="NullBackground"/>
+<Border/>
+</Style>
+<Style horizontal_alignment="0" imageLayout="1">
+<FRFont name="微软雅黑" style="1" size="72" foreground="-1"/>
+<Background name="ColorBackground" color="-11555390"/>
+<Border>
+<Top style="1" color="-5973270"/>
+<Bottom style="1" color="-5973270"/>
+<Left style="1" color="-5973270"/>
+<Right style="1" color="-5973270"/>
+</Border>
+</Style>
+<Style horizontal_alignment="0" imageLayout="1">
+<FRFont name="微软雅黑" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border>
+<Top style="1" color="-5973270"/>
+<Bottom style="1" color="-5973270"/>
+<Left style="1" color="-5973270"/>
+<Right style="1" color="-5973270"/>
+</Border>
+</Style>
+<Style horizontal_alignment="2" imageLayout="1">
+<FRFont name="微软雅黑" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border>
+<Top style="1" color="-5973270"/>
+<Bottom style="1" color="-5973270"/>
+<Left style="1" color="-5973270"/>
+<Right style="1" color="-5973270"/>
+</Border>
+</Style>
+<Style imageLayout="1">
+<FRFont name="SimSun" style="1" size="72"/>
+<Background name="NullBackground"/>
+<Border/>
+</Style>
+</StyleList>
+<DesignerVersion DesignerVersion="KAA"/>
+<PreviewType PreviewType="1"/>
+<TemplateCloudInfoAttrMark class="com.fr.plugin.cloud.analytics.attr.TemplateInfoAttrMark" pluginID="com.fr.plugin.cloud.analytics.v10" plugin-version="2.3.7.20211216">
+<TemplateCloudInfoAttrMark createTime="1637308643559"/>
+</TemplateCloudInfoAttrMark>
+<TemplateIdAttMark class="com.fr.base.iofile.attr.TemplateIdAttrMark">
+<TemplateIdAttMark TemplateId="4ece0895-21a4-4a84-8b72-4400b31f1c86"/>
+</TemplateIdAttMark>
+</WorkBook>
