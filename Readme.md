@@ -1,5 +1,5 @@
 # ETL
-How diffent ETL approach work
+How different ETL approach work
 ## KETTLE
 ## MSSQL with link server
 ## Talend Studio
