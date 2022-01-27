@@ -6,5 +6,5 @@ How different ETL approaches work.
 ## DataX(TBD)
 ## Design Pattern
 Design schema for the projects.
-## Fine Report 
+## Fine Report
 Mapping manipulate screens.
