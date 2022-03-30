@@ -2,6 +2,7 @@
 How different ETL approaches work.
 
 ## KETTLE
+Do not want to use kettle more.
 
 ## MSSQL with link server
 
