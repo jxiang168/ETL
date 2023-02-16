@@ -14,3 +14,6 @@ Design schema for the projects.
 
 ## Fine Report
 Mapping manipulate screens.
+
+## Metabase
+A opensource BI product to visualize data.
