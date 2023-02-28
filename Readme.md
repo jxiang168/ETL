@@ -18,3 +18,6 @@ Mapping manipulate screens.
 
 ## Metabase
 A opensource BI product to visualize data.
+
+## Kafka
+A distributed message queue that can be used for synchronizing data between databases.
