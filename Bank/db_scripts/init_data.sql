@@ -58,6 +58,50 @@ WHERE 1=1
 and not exists(select 1 from hcpdw.dbo.BANK_FACT_ACCOUNT_BALANCE bb2 where bb2.USE_UID = BU.USE_UID and bb2.BALANCE_DATE = CAST(BB.BALANCE_DATE AS DATE) )
 ;
 
+-- 更新账户类别为BI限定的类别
+select  u.ORIG_ACCOUNT_TYPE, u.ACCOUNT_TYPE, lk.MEANING 
+from HCPDW.dbo.BANK_DIM_ACCOUNT_USE u
+INNER join HCPDW.dbo.FIN_DIM_CUX_LOOKUPS lk on lk.LOOKUP_TYPE LIKE 'BANK_ACCOUNT_TYPE%' and lk.LOOKUP_CODE = u.ORIG_ACCOUNT_TYPE
+where 1=1
+and isnull(u.ACCOUNT_TYPE,'#NULL#') != isnull(lk.MEANING,'#NULL#') 
+;
+
+UPDATE U
+SET  u.ACCOUNT_TYPE = lk.MEANING 
+from HCPDW.dbo.BANK_DIM_ACCOUNT_USE u
+INNER join HCPDW.dbo.FIN_DIM_CUX_LOOKUPS lk on lk.LOOKUP_TYPE LIKE 'BANK_ACCOUNT_TYPE%' and lk.LOOKUP_CODE = u.ORIG_ACCOUNT_TYPE
+where 1=1
+and isnull(u.ACCOUNT_TYPE,'#NULL#') != isnull(lk.MEANING,'#NULL#') 
+;
+
+-- 默认失效无用途的账户，以及银行
+select * 
+from HCPDW.dbo.BANK_DIM_BANK_ACCOUNT ba 
+where 1=1
+and not exists(select 1 from HCPDW.dbo.BANK_DIM_ACCOUNT_USE au where au.ACCOUNT_UID = ba.ACCOUNT_UID and au.ENABLED = 1)
+;
+
+update ba
+set ba.ENABLED = 0 
+from HCPDW.dbo.BANK_DIM_BANK_ACCOUNT ba 
+where 1=1
+and not exists(select 1 from HCPDW.dbo.BANK_DIM_ACCOUNT_USE au where au.ACCOUNT_UID = ba.ACCOUNT_UID and au.ENABLED = 1)
+;
+
+
+select * 
+from HCPDW.dbo.BANK_DIM_BANK b 
+where 1=1
+and not exists(select 1 from HCPDW.dbo.BANK_DIM_BANK_ACCOUNT ba where ba.BANK_UID = b.BANK_UID and ba.ENABLED = 1)
+;
+
+update b
+set b.ENABLED = 0
+from HCPDW.dbo.BANK_DIM_BANK b 
+where 1=1
+and not exists(select 1 from HCPDW.dbo.BANK_DIM_BANK_ACCOUNT ba where ba.BANK_UID = b.BANK_UID and ba.ENABLED = 1)
+;
+
 --insert into HCPDW.DBO.BANK_DIM_BANK_ACCOUNTS
 --(SOURCE_TYPE, SOURCE_ID, COMPANY, USER_NAME, FINE_USER, BANK_NAME, BANK_NAME_CN, ACCOUNT_NUMBER, CURRENCY, ACCOUNT_TYPE, BANK_AUTHORITY, BANK_LOCATION, REMARK1, REMARK2, REMARK3, UPDATED_BY, UPDATED_DATE, FNIE_UPDATE_BY, FINE_UPDATE_dATE, DW_UPDATETIME)
 --select 'ORIG_SYS', t.ID_No ,t.Company
