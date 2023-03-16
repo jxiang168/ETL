@@ -1,0 +1,582 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WorkBook xmlVersion="20211223" releaseVersion="10.0.0">
+<TableDataMap>
+<TableData name="main" class="com.fr.data.impl.DBTableData">
+<Parameters/>
+<Attributes maxMemRowCount="-1"/>
+<Connection class="com.fr.data.impl.NameDatabaseConnection">
+<DatabaseName>
+<![CDATA[HCP_DW]]></DatabaseName>
+</Connection>
+<Query>
+<![CDATA[select * from HCPDW.DBO.BANK_DIM_BANK_ACCOUNTS a
+order by a.FINE_UPDATE_dATE desc, a.UPDATED_DATE desc]]></Query>
+<PageQuery>
+<![CDATA[]]></PageQuery>
+</TableData>
+</TableDataMap>
+<ReportWebAttr>
+<ServerPrinter/>
+<WebWriteContent>
+<Listener event="afterload">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters/>
+<Content>
+<![CDATA[$(".fr-btn-up.fr-btn-icon").css("background","none");]]></Content>
+</JavaScript>
+</Listener>
+<ToolBars>
+<ToolBarManager>
+<Location>
+<Embed position="1"/>
+</Location>
+<ToolBar>
+<Widget class="com.fr.report.web.button.NewPrint">
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false"/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[${i18n('Fine-Engine_Print')}]]></Text>
+<Hotkeys>
+<![CDATA[]]></Hotkeys>
+<IconName>
+<![CDATA[print]]></IconName>
+</Widget>
+<Widget class="com.fr.report.web.button.Export">
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false"/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[${i18n('Export')}]]></Text>
+<Hotkeys>
+<![CDATA[]]></Hotkeys>
+<IconName>
+<![CDATA[export]]></IconName>
+<Buttons pdf="true" excelP="true" excelO="true" excelS="true" word="true" image="true" html="true"/>
+</Widget>
+<Widget class="com.fr.report.web.button.Email">
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false"/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[${i18n('Fine-Engine_Report_Email')}]]></Text>
+<Hotkeys>
+<![CDATA[]]></Hotkeys>
+<IconName>
+<![CDATA[email]]></IconName>
+<EmailButton customConsignee="true" consigneeByDepartment="false" consigneeByRole="false"/>
+</Widget>
+</ToolBar>
+</ToolBarManager>
+</ToolBars>
+<EditRowColor setColor="false"/>
+<WebWrite SheetPosition="3"/>
+<RptLocation isShowAtLeft="true"/>
+<UnloadCheck/>
+<ShowWidgets/>
+<OtherAttr autoStash="false"/>
+</WebWriteContent>
+</ReportWebAttr>
+<ElementCaseMobileAttr>
+<ElementCaseMobileAttrProvider horizontal="1" vertical="1" zoom="true" refresh="false" isUseHTML="false" isMobileCanvasSize="false" appearRefresh="false" allowFullScreen="false" allowDoubleClickOrZoom="true" functionalWhenUnactivated="false"/>
+</ElementCaseMobileAttr>
+<Report class="com.fr.report.worksheet.WorkSheet" name="sheet1">
+<ReportPageAttr>
+<HR/>
+<FR/>
+<HC/>
+<FC/>
+</ReportPageAttr>
+<ColumnPrivilegeControl/>
+<RowPrivilegeControl/>
+<RowHeight defaultValue="723900">
+<![CDATA[381000,1440000,723900,723900,723900,723900,723900,723900,723900,723900,723900]]></RowHeight>
+<ColumnWidth defaultValue="2743200">
+<![CDATA[381000,914400,1295400,2743200,2743200,2743200,2743200,2743200,2743200,2743200,2743200,2743200,2743200,2743200,8640000,8640000,8640000,2743200,2743200,1955800,2743200]]></ColumnWidth>
+<CellElementList>
+<C c="0" r="0">
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="1" r="0">
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="1" r="1" s="0">
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.FreeButton">
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false"/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[]]></Text>
+<Hotkeys>
+<![CDATA[]]></Hotkeys>
+<IconName>
+<![CDATA[add]]></IconName>
+</Widget>
+<Expand/>
+</C>
+<C c="2" r="1" s="1">
+<O>
+<![CDATA[edit]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="3" r="1" s="1">
+<O>
+<![CDATA[ID]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="4" r="1" s="1">
+<O>
+<![CDATA[Bank_Name]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="5" r="1" s="1">
+<O>
+<![CDATA[BANK_NAME_CN]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="6" r="1" s="1">
+<O>
+<![CDATA[Account_Number]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="7" r="1" s="1">
+<O>
+<![CDATA[Currency]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="8" r="1" s="1">
+<O>
+<![CDATA[Account_Type]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="9" r="1" s="1">
+<O>
+<![CDATA[Company]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="10" r="1" s="1">
+<O>
+<![CDATA[User_Name]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="11" r="1" s="1">
+<O>
+<![CDATA[FINE_USER_NAME]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="12" r="1" s="1">
+<O>
+<![CDATA[Bank_Authority]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="13" r="1" s="1">
+<O>
+<![CDATA[Bank_Location]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="14" r="1" s="1">
+<O>
+<![CDATA[Remark1]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="15" r="1" s="1">
+<O>
+<![CDATA[Remark2]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="16" r="1" s="1">
+<O>
+<![CDATA[Remark3]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="17" r="1" s="1">
+<O>
+<![CDATA[UPDATE_BY]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="18" r="1" s="1">
+<O>
+<![CDATA[UPDATE_DATE]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="19" r="1" s="1">
+<O>
+<![CDATA[Disable]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="2" r="2" s="2">
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.FreeButton">
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false"/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[]]></Text>
+<Hotkeys>
+<![CDATA[]]></Hotkeys>
+<IconName>
+<![CDATA[edit]]></IconName>
+</Widget>
+<Expand leftParentDefault="false" left="D3"/>
+</C>
+<C c="3" r="2" s="3">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="ACCOUNT_ID"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="2"/>
+<CellPageAttr/>
+<Expand dir="0"/>
+</C>
+<C c="4" r="2" s="3">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="BANK_NAME"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="2"/>
+<CellPageAttr/>
+<Expand dir="0"/>
+</C>
+<C c="5" r="2" s="3">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="BANK_NAME_CN"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="2"/>
+<CellPageAttr/>
+<Expand dir="0"/>
+</C>
+<C c="6" r="2" s="3">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="ACCOUNT_NUMBER"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="2"/>
+<CellPageAttr/>
+<Expand dir="0"/>
+</C>
+<C c="7" r="2" s="3">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="CURRENCY"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="2"/>
+<CellPageAttr/>
+<Expand dir="0"/>
+</C>
+<C c="8" r="2" s="3">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="ACCOUNT_TYPE"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="2"/>
+<CellPageAttr/>
+<Expand dir="0"/>
+</C>
+<C c="9" r="2" s="3">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="COMPANY"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="2"/>
+<CellPageAttr/>
+<Expand dir="0"/>
+</C>
+<C c="10" r="2" s="3">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="USER_NAME"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="2"/>
+<CellPageAttr/>
+<Expand dir="0"/>
+</C>
+<C c="11" r="2" s="3">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="FINE_USER"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="2"/>
+<CellPageAttr/>
+<Expand dir="0"/>
+</C>
+<C c="12" r="2" s="3">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="BANK_AUTHORITY"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="2"/>
+<CellPageAttr/>
+<Expand dir="0"/>
+</C>
+<C c="13" r="2" s="3">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="BANK_LOCATION"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="2"/>
+<CellPageAttr/>
+<Expand dir="0"/>
+</C>
+<C c="14" r="2" s="4">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="REMARK1"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="2"/>
+<CellPageAttr/>
+<Expand dir="0"/>
+</C>
+<C c="15" r="2" s="4">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="REMARK2"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="2"/>
+<CellPageAttr/>
+<Expand dir="0"/>
+</C>
+<C c="16" r="2" s="4">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="REMARK3"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="2"/>
+<CellPageAttr/>
+<Expand dir="0"/>
+</C>
+<C c="17" r="2" s="3">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="FNIE_UPDATE_BY"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="2"/>
+<CellPageAttr/>
+<Expand dir="0"/>
+</C>
+<C c="18" r="2" s="3">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="FINE_UPDATE_dATE"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="2"/>
+<CellPageAttr/>
+<Expand dir="0"/>
+</C>
+<C c="19" r="2" s="5">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="DISABLED"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Widget class="com.fr.form.ui.CheckBox">
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false"/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[]]></Text>
+<Hotkeys>
+<![CDATA[]]></Hotkeys>
+<widgetValue>
+<O t="B">
+<![CDATA[false]]></O>
+</widgetValue>
+</Widget>
+<Expand dir="0"/>
+</C>
+<C c="2" r="4">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=$fine_username]]></Attributes>
+</O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[hide-row]]></Name>
+<Condition class="com.fr.data.condition.ListCondition"/>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.RowHeightHighlightAction"/>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="3" r="4">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=now()]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+</CellElementList>
+<ReportAttrSet>
+<ReportSettings shrinkToFitMode="0" headerHeight="0" footerHeight="0">
+<PaperSetting>
+<PaperSize width="144000000" height="57600000"/>
+<Margin top="0" left="0" bottom="0" right="0"/>
+</PaperSetting>
+<Background name="ColorBackground" color="-1"/>
+</ReportSettings>
+<Header reportPageType="0">
+<Background name="NullBackground"/>
+<LeftList/>
+<CenterList/>
+<RightList/>
+</Header>
+<Footer reportPageType="0">
+<Background name="NullBackground"/>
+<LeftList/>
+<CenterList/>
+<RightList/>
+</Footer>
+</ReportAttrSet>
+<PrivilegeControl/>
+</Report>
+<ReportParameterAttr>
+<Attributes showWindow="true" delayPlaying="true" windowPosition="1" align="0" useParamsTemplate="true" currentIndex="0"/>
+<PWTitle>
+<![CDATA[参数]]></PWTitle>
+</ReportParameterAttr>
+<StyleList>
+<Style horizontal_alignment="0" imageLayout="1">
+<FRFont name="SimSun" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border/>
+</Style>
+<Style horizontal_alignment="0" imageLayout="1">
+<FRFont name="微软雅黑" style="1" size="72"/>
+<Background name="NullBackground"/>
+<Border>
+<Top style="1"/>
+<Bottom style="1"/>
+<Left style="1"/>
+<Right style="1"/>
+</Border>
+</Style>
+<Style horizontal_alignment="0" imageLayout="1">
+<FRFont name="SimSun" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border>
+<Top style="1"/>
+<Bottom style="1"/>
+<Left style="1"/>
+<Right style="1"/>
+</Border>
+</Style>
+<Style horizontal_alignment="2" imageLayout="1">
+<FRFont name="微软雅黑" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border>
+<Top style="1"/>
+<Bottom style="1"/>
+<Left style="1"/>
+<Right style="1"/>
+</Border>
+</Style>
+<Style horizontal_alignment="2" textStyle="1" imageLayout="1">
+<FRFont name="微软雅黑" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border>
+<Top style="1"/>
+<Bottom style="1"/>
+<Left style="1"/>
+<Right style="1"/>
+</Border>
+</Style>
+<Style imageLayout="1">
+<FRFont name="微软雅黑" style="0" size="72"/>
+<Background name="ColorBackground" color="-1"/>
+<Border>
+<Top style="1"/>
+<Bottom style="1"/>
+<Left style="1"/>
+<Right style="1"/>
+</Border>
+</Style>
+</StyleList>
+<DesignerVersion DesignerVersion="KAA"/>
+<PreviewType PreviewType="1"/>
+<TemplateCloudInfoAttrMark class="com.fr.plugin.cloud.analytics.attr.TemplateInfoAttrMark" pluginID="com.fr.plugin.cloud.analytics.v10" plugin-version="2.10.0.20221020">
+<TemplateCloudInfoAttrMark createTime="1646981907657"/>
+</TemplateCloudInfoAttrMark>
+<TemplateIdAttMark class="com.fr.base.iofile.attr.TemplateIdAttrMark">
+<TemplateIdAttMark TemplateId="f0e59783-03e0-4952-9360-0e426c675820"/>
+</TemplateIdAttMark>
+</WorkBook>
