@@ -1,0 +1,754 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WorkBook xmlVersion="20211223" releaseVersion="10.0.0">
+<TableDataMap>
+<TableData name="dicLevelName" class="com.fr.data.impl.DBTableData">
+<Parameters/>
+<Attributes maxMemRowCount="-1"/>
+<Connection class="com.fr.data.impl.NameDatabaseConnection">
+<DatabaseName>
+<![CDATA[HCP_DW]]></DatabaseName>
+</Connection>
+<Query>
+<![CDATA[select 'SITE' as val, 3 as odb
+union all select 'ROLE', 2
+union all select 'USER', 1
+ORDER BY ODB]]></Query>
+<PageQuery>
+<![CDATA[]]></PageQuery>
+</TableData>
+<TableData name="rows" class="com.fr.data.impl.DBTableData">
+<Parameters/>
+<Attributes maxMemRowCount="-1"/>
+<Connection class="com.fr.data.impl.NameDatabaseConnection">
+<DatabaseName>
+<![CDATA[HCP_DW]]></DatabaseName>
+</Connection>
+<Query>
+<![CDATA[select PROFILE_NAME as val, DESCRIPTION as dsp
+from HCPDW.dbo.DIM_PROFILES
+where 1=1
+order by val]]></Query>
+<PageQuery>
+<![CDATA[]]></PageQuery>
+</TableData>
+<TableData name="main" class="com.fr.data.impl.DBTableData">
+<Parameters>
+<Parameter>
+<Attributes name="levelValue"/>
+<O>
+<![CDATA[]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="levelName"/>
+<O>
+<![CDATA[]]></O>
+</Parameter>
+</Parameters>
+<Attributes maxMemRowCount="-1"/>
+<Connection class="com.fr.data.impl.NameDatabaseConnection">
+<DatabaseName>
+<![CDATA[HCP_DW]]></DatabaseName>
+</Connection>
+<Query>
+<![CDATA[with c_par as (
+	select  '${levelName}' as LEVEL_NAME, '${levelValue}' as LEVEL_VALUE
+),
+c_role_detail as (
+	SELECT pv.LEVEL_NAME, pv.PROFILE_NAME, pv.PROFILE_VALUE
+	from finedb.dbo.fine_user u
+	inner join c_par par on par.LEVEL_VALUE = u.userName and par.LEVEL_NAME = 'USER'
+	inner join finedb.dbo.fine_user_role_middle ur on ur.userId = u.id
+	inner join finedb.dbo.fine_custom_role r on r.id = ur.roleId
+	inner join hcpdw.dbo.DIM_PROFILE_VALUES pv on pv.LEVEL_VALUE = r.name
+	where 1=1
+	AND pv.PROFILE_VALUE is not null
+	and pv.LEVEL_NAME = 'ROLE'
+	union ALL
+	SELECT pv.LEVEL_NAME, pv.PROFILE_NAME, pv.PROFILE_VALUE
+	from finedb.dbo.fine_custom_role r
+	inner join c_par par on par.LEVEL_VALUE = r.name and par.LEVEL_NAME = 'ROLE'
+	inner join hcpdw.dbo.DIM_PROFILE_VALUES pv on pv.LEVEL_VALUE = r.name
+	where 1=1
+	AND pv.PROFILE_VALUE is not null
+	and pv.LEVEL_NAME = 'ROLE'
+),
+c_profiles as (
+	select distinct pv.LEVEL_NAME, pv.PROFILE_NAME
+	from c_role_detail pv
+)
+-- USER
+select pv.LEVEL_NAME, pv.PROFILE_NAME, pv.PROFILE_VALUE
+from HCPDW.dbo.DIM_PROFILE_VALUES pv
+inner join c_par par on par.LEVEL_VALUE = pv.LEVEL_VALUE and par.LEVEL_NAME = 'USER'
+where 1=1
+AND pv.PROFILE_VALUE is not null
+and pv.LEVEL_NAME = 'USER'
+-- ROLE
+union all
+select pv.LEVEL_NAME, pv.PROFILE_NAME,
+	 stuff( (select DISTINCT concat(''',''',   pv2.PROFILE_VALUE )
+		from c_role_detail pv2
+		where pv2.LEVEL_NAME = pv.LEVEL_NAME and pv2.PROFILE_NAME = pv.PROFILE_NAME
+		for xml path('') ),1,3,'') as PROFILE_VALUE
+from c_profiles pv
+-- SITE
+union all
+select pv.LEVEL_NAME, pv.PROFILE_NAME, pv.PROFILE_VALUE
+from HCPDW.dbo.DIM_PROFILE_VALUES pv
+where 1=1
+AND pv.PROFILE_VALUE is not null
+and pv.LEVEL_NAME = 'SITE'
+;]]></Query>
+<PageQuery>
+<![CDATA[]]></PageQuery>
+</TableData>
+<TableData name="dicLevelValue" class="com.fr.data.impl.DBTableData">
+<Parameters>
+<Parameter>
+<Attributes name="levelName"/>
+<O>
+<![CDATA[]]></O>
+</Parameter>
+</Parameters>
+<Attributes maxMemRowCount="-1"/>
+<Connection class="com.fr.data.impl.NameDatabaseConnection">
+<DatabaseName>
+<![CDATA[HCP_DW]]></DatabaseName>
+</Connection>
+<Query>
+<![CDATA[select userName as val, concat(userName,' ( ',realName,' )') as dsp
+from finedb.dbo.fine_user 
+where 1=1
+and '${levelName}' = 'USER'
+union all
+select name as val, name as dsp
+from finedb.dbo.fine_custom_role 
+where 1=1
+and '${levelName}' = 'ROLE'
+union all
+select '0' as val,'0' as dsp
+where 1=1
+and '${levelName}' = 'SITE'
+order by val]]></Query>
+<PageQuery>
+<![CDATA[]]></PageQuery>
+</TableData>
+</TableDataMap>
+<ReportWebAttr>
+<ServerPrinter/>
+<WebWriteContent>
+<Listener event="writesuccess">
+<JavaScript class="com.fr.js.JavaScriptImpl">
+<Parameters/>
+<Content>
+<![CDATA[FR.Msg.toast("Save success. \nPage reloading...");
+setTimeout(function() {
+	// location.reload();
+	_g().parameterCommit(); // 如果有参数面板则换用这个，保留面板参数
+}, 1000);]]></Content>
+</JavaScript>
+</Listener>
+<ToolBars>
+<ToolBarManager>
+<Location>
+<Embed position="1"/>
+</Location>
+<ToolBar>
+<Widget class="com.fr.report.web.button.write.Submit">
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[${i18n('Fine-Engine_Report_Utils_Submit')}]]></Text>
+<Hotkeys>
+<![CDATA[]]></Hotkeys>
+<IconName>
+<![CDATA[submit]]></IconName>
+<Verify failVerifySubmit="false" value="true"/>
+<Sheet onlySubmitSelect="false"/>
+</Widget>
+<Widget class="com.fr.report.web.button.write.Verify">
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[${i18n('Fine-Engine_Report_Verify_Data')}]]></Text>
+<Hotkeys>
+<![CDATA[]]></Hotkeys>
+<IconName>
+<![CDATA[verify]]></IconName>
+</Widget>
+<Widget class="com.fr.report.web.button.NewPrint">
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[${i18n('Fine-Engine_Print')}]]></Text>
+<Hotkeys>
+<![CDATA[]]></Hotkeys>
+<IconName>
+<![CDATA[print]]></IconName>
+</Widget>
+<Widget class="com.fr.report.web.button.Export">
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[${i18n('Export')}]]></Text>
+<Hotkeys>
+<![CDATA[]]></Hotkeys>
+<IconName>
+<![CDATA[export]]></IconName>
+<Buttons pdf="true" excelP="true" excelO="true" excelS="true" word="true" image="true" html="true"/>
+</Widget>
+<Widget class="com.fr.report.web.button.Email">
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[${i18n('Fine-Engine_Report_Email')}]]></Text>
+<Hotkeys>
+<![CDATA[]]></Hotkeys>
+<IconName>
+<![CDATA[email]]></IconName>
+<EmailButton customConsignee="true" consigneeByDepartment="false" consigneeByRole="false"/>
+</Widget>
+<Widget class="com.fr.report.web.button.write.AppendColumnRow">
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[${i18n('Fine-Engine_Add_Record')}]]></Text>
+<Hotkeys>
+<![CDATA[]]></Hotkeys>
+<IconName>
+<![CDATA[appendrow]]></IconName>
+</Widget>
+<Widget class="com.fr.report.web.button.write.ShowCellValue">
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<widgetValue/>
+<LabelAttr verticalcenter="true" textalign="0" autoline="false"/>
+<FRFont name="SimSun" style="0" size="72"/>
+<border style="0" color="-723724"/>
+</Widget>
+</ToolBar>
+</ToolBarManager>
+</ToolBars>
+<EditRowColor setColor="false"/>
+<WebWrite SheetPosition="3"/>
+<RptLocation isShowAtLeft="true"/>
+<UnloadCheck/>
+<ShowWidgets/>
+<OtherAttr autoStash="false"/>
+</WebWriteContent>
+</ReportWebAttr>
+<ElementCaseMobileAttr>
+<ElementCaseMobileAttrProvider horizontal="1" vertical="1" zoom="true" refresh="false" isUseHTML="false" isMobileCanvasSize="false" appearRefresh="false" allowFullScreen="false" allowDoubleClickOrZoom="true" functionalWhenUnactivated="false"/>
+</ElementCaseMobileAttr>
+<Report class="com.fr.report.worksheet.WorkSheet" name="sheet1">
+<ReportPageAttr>
+<HR/>
+<FR/>
+<HC/>
+<FC/>
+</ReportPageAttr>
+<ColumnPrivilegeControl/>
+<RowPrivilegeControl/>
+<RowHeight defaultValue="723900">
+<![CDATA[723900,288000,864000,864000,864000,723900,723900,723900,723900,723900,723900]]></RowHeight>
+<ColumnWidth defaultValue="2743200">
+<![CDATA[736600,2743200,5760000,8640000,2819400,2743200,2743200,2743200,720000,2743200,2743200]]></ColumnWidth>
+<CellElementList>
+<C c="0" r="0" cs="4" s="0">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=concatenate("Level Name: ", E3, "  |  Level Value: ", F3)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="0" r="1">
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="1" r="2" rs="2" s="1">
+<O>
+<![CDATA[Profile Name]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="2" r="2" s="1">
+<O>
+<![CDATA[Profile Value]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="3" r="2" rs="2" s="1">
+<O>
+<![CDATA[Description]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="4" r="2" s="2">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=levelName]]></Attributes>
+</O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[hide-col]]></Name>
+<Condition class="com.fr.data.condition.ListCondition"/>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.ColWidthHighlightAction"/>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="5" r="2" s="2">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=levelValue]]></Attributes>
+</O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[hide-col]]></Name>
+<Condition class="com.fr.data.condition.ListCondition"/>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.ColWidthHighlightAction"/>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="6" r="2" s="2">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=now()]]></Attributes>
+</O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[hide-col]]></Name>
+<Condition class="com.fr.data.condition.ListCondition"/>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.ColWidthHighlightAction"/>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="7" r="2" s="2">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=fine_username]]></Attributes>
+</O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[hide-col]]></Name>
+<Condition class="com.fr.data.condition.ListCondition"/>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.ColWidthHighlightAction"/>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="2" r="3" s="1">
+<O t="DSColumn">
+<Attributes dsName="dicLevelName" columnName="val"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[hide-col]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[value("dicLevelName",2,1,$$$) < value("dicLevelName",2,1,E3)]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.ColWidthHighlightAction"/>
+</Highlight>
+</HighlightList>
+<Expand dir="1"/>
+</C>
+<C c="4" r="3">
+<O>
+<![CDATA[converted]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="1" r="4" s="3">
+<O t="DSColumn">
+<Attributes dsName="rows" columnName="val"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="2"/>
+<CellPageAttr/>
+<Expand dir="0"/>
+</C>
+<C c="2" r="4" s="4">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="PROFILE_VALUE"/>
+<Condition class="com.fr.data.condition.ListCondition">
+<JoinCondition join="0">
+<Condition class="com.fr.data.condition.CommonCondition">
+<CNUMBER>
+<![CDATA[0]]></CNUMBER>
+<CNAME>
+<![CDATA[PROFILE_NAME]]></CNAME>
+<Compare op="0">
+<SimpleDSColumn dsName="rows" columnName="val"/>
+</Compare>
+</Condition>
+</JoinCondition>
+<JoinCondition join="0">
+<Condition class="com.fr.data.condition.CommonCondition">
+<CNUMBER>
+<![CDATA[0]]></CNUMBER>
+<CNAME>
+<![CDATA[LEVEL_NAME]]></CNAME>
+<Compare op="0">
+<SimpleDSColumn dsName="dicLevelName" columnName="val"/>
+</Compare>
+</Condition>
+</JoinCondition>
+</Condition>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Result>
+<![CDATA[$$$]]></Result>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="1"/>
+<CellPageAttr/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[editable]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[C4 = E3]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-35"/>
+</HighlightAction>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.WidgetHighlightAction">
+<Widget class="com.fr.form.ui.TextEditor">
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<TextAttr/>
+<Reg class="com.fr.form.ui.reg.NoneReg"/>
+<widgetValue/>
+<MobileScanCodeAttr scanCode="true" textInputMode="0"/>
+</Widget>
+</HighlightAction>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="3" r="4" s="3">
+<O t="DSColumn">
+<Attributes dsName="rows" columnName="dsp"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="1"/>
+<CellPageAttr/>
+<Expand/>
+</C>
+<C c="4" r="4" s="2">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=if(len(C5{C4==E3}) > 0, C5{C4==E3}, null)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="8" r="5" s="5">
+<PrivilegeControl/>
+<Expand/>
+</C>
+</CellElementList>
+<ReportAttrSet>
+<ReportSettings shrinkToFitMode="0" headerHeight="0" footerHeight="0">
+<PaperSetting>
+<Margin top="986400" left="2743200" bottom="986400" right="2743200"/>
+</PaperSetting>
+<Background name="ColorBackground" color="-1"/>
+</ReportSettings>
+<Header reportPageType="0">
+<Background name="NullBackground"/>
+<LeftList/>
+<CenterList/>
+<RightList/>
+</Header>
+<Footer reportPageType="0">
+<Background name="NullBackground"/>
+<LeftList/>
+<CenterList/>
+<RightList/>
+</Footer>
+</ReportAttrSet>
+<ReportWriteAttr>
+<SubmitVisitor class="com.fr.report.write.BuiltInSQLSubmiter">
+<Name>
+<![CDATA[内置SQL1]]></Name>
+<Attributes dsName="HCP_DW"/>
+<DMLConfig class="com.fr.write.config.UpdateConfig">
+<Table schema="dbo" name="DIM_PROFILE_VALUES"/>
+<ColumnConfig name="PROFILE_NAME" isKey="true" skipUnmodified="false">
+<ColumnRow column="1" row="4"/>
+</ColumnConfig>
+<ColumnConfig name="LEVEL_NAME" isKey="true" skipUnmodified="false">
+<ColumnRow column="4" row="2"/>
+</ColumnConfig>
+<ColumnConfig name="LEVEL_VALUE" isKey="true" skipUnmodified="false">
+<ColumnRow column="5" row="2"/>
+</ColumnConfig>
+<ColumnConfig name="PROFILE_VALUE" isKey="false" skipUnmodified="false">
+<ColumnRow column="4" row="4"/>
+</ColumnConfig>
+<ColumnConfig name="UPDATE_TIME" isKey="false" skipUnmodified="false">
+<ColumnRow column="6" row="2"/>
+</ColumnConfig>
+<ColumnConfig name="UPDATE_BY" isKey="false" skipUnmodified="false">
+<ColumnRow column="7" row="2"/>
+</ColumnConfig>
+<Condition class="com.fr.data.condition.ListCondition"/>
+<UpdateAttr updateStatus="true"/>
+</DMLConfig>
+</SubmitVisitor>
+</ReportWriteAttr>
+<PrivilegeControl/>
+</Report>
+<ReportParameterAttr>
+<Attributes showWindow="true" delayPlaying="false" windowPosition="1" align="0" useParamsTemplate="false" currentIndex="0"/>
+<PWTitle>
+<![CDATA[参数]]></PWTitle>
+<ParameterUI class="com.fr.form.main.parameter.FormParameterUI">
+<Parameters/>
+<Layout class="com.fr.form.ui.container.WParameterLayout">
+<WidgetName name="para"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Margin top="0" left="0" bottom="0" right="0"/>
+<Border>
+<border style="0" color="-723724" borderRadius="0" type="0" borderStyle="0"/>
+<WidgetTitle>
+<O>
+<![CDATA[新建标题]]></O>
+<FRFont name="SimSun" style="0" size="72"/>
+<Position pos="0"/>
+</WidgetTitle>
+<Alpha alpha="1.0"/>
+</Border>
+<Background name="ColorBackground" color="-526086"/>
+<LCAttr vgap="0" hgap="0" compInterval="0"/>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.parameter.FormSubmitButton">
+<WidgetName name="formSubmit0"/>
+<WidgetID widgetID="f5e8438a-ba1f-4d6a-9164-4a1e6084f8bd"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[Search]]></Text>
+<Hotkeys>
+<![CDATA[enter]]></Hotkeys>
+</InnerWidget>
+<BoundsAttr x="488" y="6" width="80" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.ComboBox">
+<WidgetName name="levelValue"/>
+<LabelName name="Level Value: "/>
+<WidgetID widgetID="1d211659-fcfa-4e03-be03-37bf56494e3e"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="val" viName="dsp"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[dicLevelValue]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+<widgetValue>
+<O>
+<![CDATA[0]]></O>
+</widgetValue>
+</InnerWidget>
+<BoundsAttr x="284" y="6" width="160" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.Label">
+<WidgetName name="label0_c"/>
+<WidgetID widgetID="4a6ba36f-fd86-46e5-b64e-30eeedf2efbd"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<widgetValue>
+<O>
+<![CDATA[Level Value: ]]></O>
+</widgetValue>
+<LabelAttr verticalcenter="true" textalign="0" autoline="true"/>
+<FRFont name="微软雅黑" style="0" size="72"/>
+<border style="0" color="-723724"/>
+</InnerWidget>
+<BoundsAttr x="200" y="6" width="84" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.ComboBox">
+<WidgetName name="levelName"/>
+<LabelName name="Level Name: "/>
+<WidgetID widgetID="7c056559-d072-4b7a-81bc-064c50ab5837"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="val" viName="val"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[dicLevelName]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+<widgetValue>
+<O>
+<![CDATA[SITE]]></O>
+</widgetValue>
+</InnerWidget>
+<BoundsAttr x="102" y="6" width="80" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.Label">
+<WidgetName name="label0"/>
+<WidgetID widgetID="4a6ba36f-fd86-46e5-b64e-30eeedf2efbd"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<widgetValue>
+<O>
+<![CDATA[Level Name: ]]></O>
+</widgetValue>
+<LabelAttr verticalcenter="true" textalign="0" autoline="true"/>
+<FRFont name="微软雅黑" style="0" size="72"/>
+<border style="0" color="-723724"/>
+</InnerWidget>
+<BoundsAttr x="18" y="6" width="84" height="21"/>
+</Widget>
+<ShowBookmarks showBookmarks="false"/>
+<Sorted sorted="false"/>
+<MobileWidgetList>
+<Widget widgetName="levelName"/>
+<Widget widgetName="levelValue"/>
+<Widget widgetName="formSubmit0"/>
+</MobileWidgetList>
+<FrozenWidgets/>
+<MobileBookMarkStyle class="com.fr.form.ui.mobile.impl.DefaultMobileBookMarkStyle"/>
+<Display display="true"/>
+<DelayDisplayContent delay="false"/>
+<UseParamsTemplate use="false"/>
+<Position position="0"/>
+<Design_Width design_width="602"/>
+<NameTagModified>
+<TagModified tag="levelName" modified="true"/>
+<TagModified tag="levelValue" modified="true"/>
+</NameTagModified>
+<WidgetNameTagMap>
+<NameTag name="levelName" tag="Level Name: "/>
+<NameTag name="levelValue" tag="Level Value: "/>
+</WidgetNameTagMap>
+<ParamAttr class="com.fr.report.mobile.DefaultMobileParamStyle"/>
+<ParamStyle class="com.fr.form.ui.mobile.impl.DefaultMobileParameterStyle"/>
+</Layout>
+<DesignAttr width="602" height="33"/>
+</ParameterUI>
+</ReportParameterAttr>
+<StyleList>
+<Style imageLayout="1">
+<FRFont name="微软雅黑" style="1" size="72"/>
+<Background name="NullBackground"/>
+<Border/>
+</Style>
+<Style horizontal_alignment="0" imageLayout="1">
+<FRFont name="微软雅黑" style="1" size="72"/>
+<Background name="NullBackground"/>
+<Border>
+<Top style="1"/>
+<Bottom style="1"/>
+<Left style="1"/>
+<Right style="1"/>
+</Border>
+</Style>
+<Style horizontal_alignment="2" imageLayout="1">
+<FRFont name="SimSun" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border/>
+</Style>
+<Style imageLayout="1">
+<FRFont name="微软雅黑" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border>
+<Top style="1"/>
+<Bottom style="1"/>
+<Left style="1"/>
+<Right style="1"/>
+</Border>
+</Style>
+<Style horizontal_alignment="2" imageLayout="1">
+<Format class="com.fr.base.TextFormat"/>
+<FRFont name="微软雅黑" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border>
+<Top style="1"/>
+<Bottom style="1"/>
+<Left style="1"/>
+<Right style="1"/>
+</Border>
+</Style>
+<Style imageLayout="1">
+<FRFont name="SimSun" style="1" size="72"/>
+<Background name="NullBackground"/>
+<Border/>
+</Style>
+</StyleList>
+<DesignerVersion DesignerVersion="KAA"/>
+<PreviewType PreviewType="1"/>
+<TemplateCloudInfoAttrMark class="com.fr.plugin.cloud.analytics.attr.TemplateInfoAttrMark" pluginID="com.fr.plugin.cloud.analytics.v10" plugin-version="2.14.0.20230222">
+<TemplateCloudInfoAttrMark createTime="1701152633795"/>
+</TemplateCloudInfoAttrMark>
+<TemplateIdAttMark class="com.fr.base.iofile.attr.TemplateIdAttrMark">
+<TemplateIdAttMark TemplateId="e540e31b-07e9-45d2-a2ba-13a3f9ca81c2"/>
+</TemplateIdAttMark>
+</WorkBook>
