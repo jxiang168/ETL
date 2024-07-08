@@ -13,6 +13,11 @@
 <O>
 <![CDATA[]]></O>
 </Parameter>
+<Parameter>
+<Attributes name="p_type_limit"/>
+<O>
+<![CDATA[]]></O>
+</Parameter>
 </Parameters>
 <Attributes maxMemRowCount="-1"/>
 <Connection class="com.fr.data.impl.NameDatabaseConnection">
@@ -25,6 +30,7 @@ from HCPDW.dbo.FIN_DIM_CUX_LOOKUP_TYPES lk
 where lk.display_flag = 1
 ${if(len(p_type_group)==0,""," and lk.TYPE_GROUP in ('" + p_type_group + "') ")}
 ${if(len(p_category)==0,""," and lk.TYPE_GROUP in ('" + p_category + "') ")}
+${if(len(p_type_limit)==0,""," and lk.LOOKUP_TYPE in ('" + p_type_limit + "') ")}
 order by dsp]]></Query>
 <PageQuery>
 <![CDATA[]]></PageQuery>
@@ -520,6 +526,17 @@ setTimeout(function() {
 <![CDATA[add]]></IconName>
 <FixCell row="3" col="1"/>
 </Widget>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[hide-button]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[op2 = "view"]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.WidgetHighlightAction"/>
+</Highlight>
+</HighlightList>
 <Expand leftParentDefault="false" left="B4"/>
 </C>
 <C c="1" r="3" s="2">
@@ -729,6 +746,17 @@ setTimeout(function() {
 <![CDATA[delete]]></IconName>
 <FixCell row="3" col="1"/>
 </Widget>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[hide-button]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[op2 = "view"]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.WidgetHighlightAction"/>
+</Highlight>
+</HighlightList>
 <Expand leftParentDefault="false" left="B4"/>
 </C>
 </CellElementList>
@@ -803,7 +831,7 @@ setTimeout(function() {
 <PrivilegeControl/>
 </Report>
 <ReportParameterAttr>
-<Attributes showWindow="true" delayPlaying="false" windowPosition="1" align="0" useParamsTemplate="false" currentIndex="0"/>
+<Attributes showWindow="true" delayPlaying="false" windowPosition="1" align="0" useParamsTemplate="false" currentIndex="8"/>
 <PWTitle>
 <![CDATA[参数]]></PWTitle>
 <ParameterUI class="com.fr.form.main.parameter.FormParameterUI">
@@ -827,6 +855,26 @@ setTimeout(function() {
 </Border>
 <Background name="ColorBackground" color="-526086"/>
 <LCAttr vgap="0" hgap="0" compInterval="0"/>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.TextEditor">
+<WidgetName name="op2"/>
+<WidgetID widgetID="f752375a-6d3e-4722-88a8-f2adf36e59ff"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName="textEditor0"/>
+<PrivilegeControl/>
+</WidgetAttr>
+<TextAttr/>
+<Reg class="com.fr.form.ui.reg.NoneReg"/>
+<widgetValue>
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=op]]></Attributes>
+</O>
+</widgetValue>
+<MobileScanCodeAttr scanCode="true" textInputMode="0"/>
+</InnerWidget>
+<BoundsAttr x="6" y="36" width="80" height="21"/>
+</Widget>
 <Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
 <InnerWidget class="com.fr.form.ui.ComboBox">
 <WidgetName name="p_category"/>
@@ -936,6 +984,7 @@ setTimeout(function() {
 <Widget widgetName="p_category"/>
 <Widget widgetName="p_lookup_type"/>
 <Widget widgetName="formSubmit0"/>
+<Widget widgetName="op2"/>
 </MobileWidgetList>
 <FrozenWidgets/>
 <MobileBookMarkStyle class="com.fr.form.ui.mobile.impl.DefaultMobileBookMarkStyle"/>
@@ -945,17 +994,17 @@ setTimeout(function() {
 <Position position="0"/>
 <Design_Width design_width="705"/>
 <NameTagModified>
+<TagModified tag="p_category" modified="true"/>
 <TagModified tag="p_lookup_type" modified="true"/>
-<TagModified tag="p_lookup_type_c" modified="true"/>
 </NameTagModified>
 <WidgetNameTagMap>
+<NameTag name="p_category" tag="Category: "/>
 <NameTag name="p_lookup_type" tag="Lookup Type: "/>
-<NameTag name="p_lookup_type_c" tag="Category: "/>
 </WidgetNameTagMap>
 <ParamAttr class="com.fr.report.mobile.DefaultMobileParamStyle"/>
 <ParamStyle class="com.fr.report.mobile.EmptyMobileParamStyle"/>
 </Layout>
-<DesignAttr width="705" height="32"/>
+<DesignAttr width="705" height="34"/>
 </ParameterUI>
 <Parameter>
 <Attributes name="p_type_group"/>
@@ -1003,9 +1052,9 @@ setTimeout(function() {
 </Style>
 </StyleList>
 <DesignerVersion DesignerVersion="KAA"/>
-<PreviewType PreviewType="1"/>
+<PreviewType PreviewType="2"/>
 <TemplateIdAttMark class="com.fr.base.iofile.attr.TemplateIdAttrMark">
-<TemplateIdAttMark TemplateId="5d9a67cb-8d7b-455e-9dc6-224d05838f8a"/>
+<TemplateIdAttMark TemplateId="b03db1d4-d30b-4db0-9fbe-fae4da8f62de"/>
 </TemplateIdAttMark>
 <TemplateCloudInfoAttrMark class="com.fr.plugin.cloud.analytics.attr.TemplateInfoAttrMark" pluginID="com.fr.plugin.cloud.analytics.v10" plugin-version="2.14.0.20230222">
 <TemplateCloudInfoAttrMark createTime="1646191885024"/>
