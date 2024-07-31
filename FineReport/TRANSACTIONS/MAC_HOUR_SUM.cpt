@@ -1,0 +1,3036 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WorkBook xmlVersion="20211223" releaseVersion="10.0.0">
+<TableDataMap>
+<TableData name="DIC_FACTORIES" class="com.fr.data.impl.DBTableData">
+<Parameters>
+<Parameter>
+<Attributes name="g_org_code"/>
+<O>
+<![CDATA[]]></O>
+</Parameter>
+</Parameters>
+<Attributes maxMemRowCount="-1"/>
+<Connection class="com.fr.data.impl.NameDatabaseConnection">
+<DatabaseName>
+<![CDATA[HCP_DW]]></DatabaseName>
+</Connection>
+<Query>
+<![CDATA[select loi.ORGANIZATION_CODE , loi.DISPLAY_NAME 
+from hcpdw.dbo.OPS_DIM_LOADING_ORG_INFO loi
+where 1=1
+${if(find("ALL",g_org_code)>0,"","and loi.ORGANIZATION_CODE in ('"+g_org_code+"')")}
+order by loi.ODB ]]></Query>
+<PageQuery>
+<![CDATA[]]></PageQuery>
+</TableData>
+<TableData name="DIC_PROCESSES" class="com.fr.data.impl.DBTableData">
+<Parameters>
+<Parameter>
+<Attributes name="g_org_code"/>
+<O>
+<![CDATA[]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_factories"/>
+<O>
+<![CDATA[HA1]]></O>
+</Parameter>
+</Parameters>
+<Attributes maxMemRowCount="-1"/>
+<Connection class="com.fr.data.impl.NameDatabaseConnection">
+<DatabaseName>
+<![CDATA[HCP_DW]]></DatabaseName>
+</Connection>
+<Query>
+<![CDATA[SELECT DISTINCT MAC.Process 
+FROM HCPDW.DBO.DIM_EPLAN_MACHINE MAC
+INNER JOIN HCPDW.DBO.DIM_EPLAN_COMPANY CMP ON CMP.COMPID = MAC.COMPID
+INNER JOIN HCPDW.DBO.OPS_DIM_LOADING_ORG_INFO LOI ON LOI.ORGANIZATION_CODE =CMP.CompEName 
+WHERE MAC.Process IS NOT NULL
+and mac.PLANNING_MACHINE = 1
+${if(find("ALL",g_org_code)>0,"","and cmp.CompEName in ('"+g_org_code+"')")}
+${if(len(p_factories)=0,"","and cmp.CompEName in ('"+p_factories+"')")}
+order by 1]]></Query>
+<PageQuery>
+<![CDATA[]]></PageQuery>
+</TableData>
+<TableData name="cols" class="com.fr.data.impl.DBTableData">
+<Parameters>
+<Parameter>
+<Attributes name="p_enddate"/>
+<O>
+<![CDATA[]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_monthbf"/>
+<O>
+<![CDATA[6]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_monthaf"/>
+<O>
+<![CDATA[4]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_weekbf"/>
+<O>
+<![CDATA[3]]></O>
+</Parameter>
+</Parameters>
+<Attributes maxMemRowCount="-1"/>
+<Connection class="com.fr.data.impl.NameDatabaseConnection">
+<DatabaseName>
+<![CDATA[HCP_DW]]></DatabaseName>
+</Connection>
+<Query>
+<![CDATA[with c_par as (select cast('${p_enddate}' as date) as cutoff, cast('${p_monthbf}'as int) as month_bf, cast('${p_weekbf}'as int) as week_bf, cast('${p_monthaf}'as int) as month_af )
+--with c_par as (select cast(getdate()-1 as date) as cutoff, cast('6'as int) as month_bf, cast('4'as int) as week_bf, cast('3'as int) as month_af )
+select 'MONTH_BF' as DATE_TYPE, 'A1' AS DATE_ODB, LEFT(dateadd(month,-spv.[number]A , par.cutoff),7) AS COL, LEFT(dateadd(month,-spv.[number]A, par.cutoff),7) AS COL_DSP
+from master.dbo.spt_values spv
+cross join c_par par
+where spv.[type]A ='P'
+and spv.[number]A between 1 and par.month_bf
+union all
+select 'WEEK_BF' as DATE_TYPE, 'A2' AS DATE_ODB
+,concat(datepart(year,dateadd(week,-spv.[number]A,par.cutoff)),'WK' ,right(100+datepart(week,dateadd(week,-spv.[number]A,par.cutoff)),2)) as COL
+,concat('','WK' ,right(100+datepart(week,dateadd(week,-spv.[number]A,par.cutoff)),2)) as COL_DSP
+from master.dbo.spt_values spv
+cross join c_par par
+where spv.[type]A ='P'
+and spv.[number]A between 1 and par.week_bf
+UNION ALL 
+select 'MONTH_AF' as DATE_TYPE, 'A3' AS DATE_ODB, LEFT(dateadd(month,spv.[number]A-1 , par.cutoff),7) AS COL, LEFT(dateadd(month,spv.[number]A -1, par.cutoff),7) AS COL_DSP
+from master.dbo.spt_values spv
+cross join c_par par
+where spv.[type]A ='P'
+and spv.[number]A between 1 and par.month_af
+ORDER BY DATE_ODB, COL]]></Query>
+<PageQuery>
+<![CDATA[]]></PageQuery>
+</TableData>
+<TableData name="macs" class="com.fr.data.impl.DBTableData">
+<Parameters>
+<Parameter>
+<Attributes name="p_enddate"/>
+<O>
+<![CDATA[2021-03-31]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_monthbf"/>
+<O>
+<![CDATA[6]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_processes"/>
+<O>
+<![CDATA[涂装]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_dim2"/>
+<O>
+<![CDATA[Category]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_monthaf"/>
+<O>
+<![CDATA[3]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_weekbf"/>
+<O>
+<![CDATA[4]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_machines"/>
+<O>
+<![CDATA[]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="g_org_code"/>
+<O>
+<![CDATA[SH1]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_factories"/>
+<O>
+<![CDATA[]]></O>
+</Parameter>
+</Parameters>
+<Attributes maxMemRowCount="-1"/>
+<Connection class="com.fr.data.impl.NameDatabaseConnection">
+<DatabaseName>
+<![CDATA[HCP_DW]]></DatabaseName>
+</Connection>
+<Query>
+<![CDATA[with c_par as (select cast('${p_enddate}' as date) as cutoff, cast('${p_monthbf}'as int) as month_bf, cast('${p_weekbf}'as int) as week_bf, cast('${p_monthaf}'as int) as month_af )
+--with c_par as (select cast('2021-03-31' as date) as cutoff, cast('6'as int) as month_bf, cast('4'as int) as week_bf, cast('3'as int) as month_af )
+,c_tgts as (
+select tgt.MID , tgt.OEE_TARGET , rank() over(partition by tgt.MID order by tgt.YEAR_MONTH desc) as rnk
+from hcpdw.dbo.OPS_DIM_MAC_OEE_TARGET tgt
+cross join c_par par
+where 1=1
+and (tgt.YEAR_MONTH between convert(char(7),dateadd(month,-par.month_bf,par.cutoff),23) and convert(char(7),dateadd(month,par.month_af-1,par.cutoff),23) )
+and tgt.OEE_TARGET > 0
+)
+,c_machine as (
+	select distinct 
+	${if(p_dim2="Resource","mac.ResourceCode as MachineNo ,mac.ResourceName as MACHINENAME",  if(p_dim2 = "Category","isnull(mac.category1,'Others') as MachineNo ,null as MACHINENAME", "mac.MachineNo, MAC.MACHINENAME" ) ) }
+	,cmp.CompEName ,loi.ODB  as ORG_ODB, AVG(tgt.OEE_TARGET) /100 as OEE_TARGET
+	,SUM(CASE WHEN(MAC.EffectDate IS NULL OR MAC.EffectDate < GETDATE()) AND (MAC.DisabledDate IS NULL OR MAC.DisabledDate > GETDATE() ) THEN 1 ELSE 0 END ) AS MAC_CNT
+	,loi.DISPLAY_NAME 
+	from hcpdw.dbo.DIM_EPLAN_MACHINE as mac
+	cross join c_par par
+	inner join hcpdw.dbo.DIM_EPLAN_DEPARTMENT as dep on dep.DepID = mac.DepID 
+	inner join hcpdw.dbo.DIM_EPLAN_COMPANY as cmp on cmp.CompID  = mac.CompID 
+	inner join hcpdw.dbo.OPS_DIM_LOADING_ORG_INFO loi on loi.ORGANIZATION_CODE =cmp.CompEName 
+	inner join c_tgts tgt on tgt.mid = mac.MID and tgt.rnk = 1
+	where 1=1
+	and mac.Process is not null
+	and mac.PLANNING_MACHINE = 1
+	and (mac.OEEActiveDate is null or convert(char(7),mac.OEEActiveDate,23) <= convert(char(7),dateadd(month,par.month_af-1,par.cutoff),23) )
+	and (mac.OEEInactiveDate is null or convert(char(7),mac.OEEInactiveDate,23) > convert(char(7),dateadd(month,-par.month_bf,par.cutoff),23) )
+	and (mac.EffectDate is null or convert(char(7),mac.EffectDate,23) <= convert(char(7),dateadd(month,par.month_af-1,par.cutoff),23) )
+	and (mac.DisabledDate is null or convert(char(7),mac.DisabledDate,23) > convert(char(7),dateadd(month,-par.month_bf,par.cutoff),23) )
+	and dep.DepName not in ('外协','Outsourcing')
+${if(find("ALL",g_org_code)>0,"","and cmp.CompEName in ('"+g_org_code+"')")}	
+	${if(len(p_factories)=0,"","and cmp.CompEName in ('"+p_factories+"')")}
+	${if(len(p_processes)=0,"","and mac.Process in ('"+p_processes+"')")}
+	${if(len(p_machines)=0,"","and mac.MachineNo in ('"+p_machines+"')")}
+	GROUP BY ${if(p_dim2="Resource","mac.ResourceCode ,mac.ResourceName",  if(p_dim2 = "Category","isnull(mac.category1,'Others')", "mac.MachineNo, MAC.MACHINENAME" ) ) }
+	,cmp.CompEName ,loi.ODB,loi.DISPLAY_NAME 
+)
+select * from c_machine
+order by ORG_ODB, (case machineno when '电动机' then '1' when '油压机' then '2' when '双色机' then '3' when 'Others' then '4' else concat('5',machineno) end)]]></Query>
+<PageQuery>
+<![CDATA[]]></PageQuery>
+</TableData>
+<TableData name="DIC_DIMS2" class="com.fr.data.impl.DBTableData">
+<Parameters/>
+<Attributes maxMemRowCount="-1"/>
+<Connection class="com.fr.data.impl.NameDatabaseConnection">
+<DatabaseName>
+<![CDATA[HCP_DW]]></DatabaseName>
+</Connection>
+<Query>
+<![CDATA[SELECT 'Machine' as DIM
+union all select 'Resource'
+union all select 'Category']]></Query>
+<PageQuery>
+<![CDATA[]]></PageQuery>
+</TableData>
+<TableData name="main" class="com.fr.data.impl.DBTableData">
+<Parameters>
+<Parameter>
+<Attributes name="p_enddate"/>
+<O>
+<![CDATA[2021-09-27]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_monthbf"/>
+<O>
+<![CDATA[6]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_processes"/>
+<O>
+<![CDATA[Assembly]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_dim2"/>
+<O>
+<![CDATA[RESOURCE]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_monthaf"/>
+<O>
+<![CDATA[3]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_weekbf"/>
+<O>
+<![CDATA[4]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_machines"/>
+<O>
+<![CDATA[]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_factories"/>
+<O>
+<![CDATA[NH]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="g_org_code"/>
+<O>
+<![CDATA[ALL]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_calendar"/>
+<O>
+<![CDATA[]]></O>
+</Parameter>
+</Parameters>
+<Attributes maxMemRowCount="-1"/>
+<Connection class="com.fr.data.impl.NameDatabaseConnection">
+<DatabaseName>
+<![CDATA[HCP_DW]]></DatabaseName>
+</Connection>
+<Query>
+<![CDATA[with c_par as (select cast('${p_enddate}' as date) as cutoff, cast('${p_monthbf}'as int) as month_bf, cast('${p_weekbf}'as int) as week_bf, cast('${p_monthaf}'as int) as month_af )
+--with c_par as (select cast('2021-03-31' as date) as cutoff, cast('6'as int) as month_bf, cast('4'as int) as week_bf, cast('3'as int) as month_af )
+,c_tgts as (
+select tgt.MID , tgt.OEE_TARGET , rank() over(partition by tgt.MID order by tgt.YEAR_MONTH desc) as rnk
+from hcpdw.dbo.OPS_DIM_MAC_OEE_TARGET tgt
+cross join c_par par
+where 1=1
+and (tgt.YEAR_MONTH between convert(char(7),dateadd(month,-par.month_bf,par.cutoff),23) and convert(char(7),dateadd(month,par.month_af-1,par.cutoff),23) )
+and tgt.OEE_TARGET > 0
+)
+,c_machine as (
+	select mac.MID ,mac.MachineNo ,mac.MachineName 
+	,mac.ResourceCode ,mac.ResourceName ,mac.CATEGORY1 
+	,concat(replace(cmp.CompEName,'1',''),(case when dep.DepName like '%II' THEN 'II' ELSE (CASE WHEN cmp.CompEName IN ('SZ1','HA1') THEN 'I' ELSE '' END) END)) AS NEW_COMP
+	,cmp.CompEName ,loi.ODB  as ORG_ODB, tgt.OEE_TARGET /100 as OEE_TARGET,mac.EffectDate,mac.DisabledDate
+	from hcpdw.dbo.DIM_EPLAN_MACHINE as mac
+	cross join c_par par
+	inner join hcpdw.dbo.DIM_EPLAN_DEPARTMENT as dep on dep.DepID = mac.DepID 
+	inner join hcpdw.dbo.DIM_EPLAN_COMPANY as cmp on cmp.CompID  = mac.CompID 
+	inner join hcpdw.dbo.OPS_DIM_LOADING_ORG_INFO loi on loi.ORGANIZATION_CODE =cmp.CompEName 
+	inner join c_tgts tgt on tgt.mid = mac.MID and tgt.rnk = 1
+	where 1=1
+	and mac.Process is not null
+	and mac.PLANNING_MACHINE = 1
+	and (mac.OEEActiveDate is null or convert(char(7),mac.OEEActiveDate,23) <= convert(char(7),dateadd(month,par.month_af-1,par.cutoff),23) )
+	and (mac.OEEInactiveDate is null or convert(char(7),mac.OEEInactiveDate,23) > convert(char(7),dateadd(month,-par.month_bf,par.cutoff),23) )
+	and (mac.EffectDate is null or convert(char(7),mac.EffectDate,23) <= convert(char(7),dateadd(month,par.month_af-1,par.cutoff),23) )
+	and (mac.DisabledDate is null or convert(char(7),mac.DisabledDate,23) > convert(char(7),dateadd(month,-par.month_bf,par.cutoff),23) )
+	and dep.DepName not in ('外协','Outsourcing')
+${if(find("ALL",g_org_code)>0,"","and cmp.CompEName in ('"+g_org_code+"')")}	
+	${if(len(p_factories)=0,"","and cmp.CompEName in ('"+p_factories+"')")}
+	${if(len(p_processes)=0,"","and mac.Process in ('"+p_processes+"')")}
+	${if(len(p_machines)=0,"","and mac.MachineNo in ('"+p_machines+"')")}
+)
+,c_plan as (
+	select MachineNo , convert(char(7),PLAN_DATE,23) AS YEAR_MONTH, sum(MAC_HOUR) as PLAN_HOUR 
+	from hcpdw.dbo.OPS_FACT_LOADING_PLAN_DETAIL
+	group by  MachineNo , convert(char(7),PLAN_DATE,23)
+)
+,c_absorb as (
+	select mid, convert(char(7),CALCDATE,23)  AS YEAR_MONTH, sum(ABSORB_HOURS) as ABSORB_HOURS
+	from HCPDW.DBO.OPS_FACT_MAC_ABSORB_HOUR
+	group by mid, convert(char(7),CALCDATE,23)  
+)
+,c_standard as (
+SELECT sth.MID , convert(char(7),sth.CALENDAR_DATE ,23)  AS YEAR_MONTH,sum(sth.STD_HOUR) as STD_HOUR
+FROM hcpdw.dbo.OPS_FACT_MAC_STD_HOUR sth
+inner join c_machine mac on mac.mid = sth.mid
+where 1=1
+and (mac.EffectDate is null or mac.EffectDate < sth.CALENDAR_DATE )
+and (mac.DisabledDate is null or mac.DisabledDate > sth.CALENDAR_DATE)
+group by sth.MID,convert(char(7),sth.CALENDAR_DATE ,23)
+)
+,c_standard_holiday as (
+SELECT mac.MID , convert(char(7),std.CALENDAR_DATE ,23)  AS YEAR_MONTH
+${if(p_calendar=="NO-HOLIDAY"
+,",sum(isnull(sth.OVERRIDE_WORKDAY,24)) as STD_HOUR"
+,",sum(24) as STD_HOUR"
+	)} 
+FROM HCPDW.dbo.DIM_MAN_DEFAULT_CALENDAR std
+left join hcpdw.dbo.DIM_MAN_CALENDAR_EXCEPTIONS sth
+on sth.CALENDAR_CODE = std.CALENDAR_CODE
+		and sth.FACTORY_CODE = std.FACTORY_CODE
+		and sth.OVERRIDE_WORKDAY = 0
+		and sth.CALENDAR_DATE  = std.CALENDAR_DATE
+cross join c_machine mac
+where 1=1
+and (mac.EffectDate is null or mac.EffectDate < std.CALENDAR_DATE )
+and (mac.DisabledDate is null or mac.DisabledDate > std.CALENDAR_DATE)
+group by mac.MID,convert(char(7),std.CALENDAR_DATE ,23)
+)
+,c_detail as (
+select mac.mid, mac.CompEName, mac.MachineNo, mac.MachineName ,mac.ResourceCode ,mac.ResourceName ,mac.CATEGORY1 
+,tgt.YEAR_MONTH, sum(pln.PLAN_HOUR) as PLAN_HOUR, sum(asb.ABSORB_HOURS) as ABSORB_HOURS, sum(sth.STD_HOUR) as STD_HOUR
+from hcpdw.dbo.OPS_DIM_MAC_OEE_TARGET tgt
+inner join c_machine mac on mac.mid = tgt.mid
+left join c_plan pln on pln.MachineNo = mac.MachineNo and pln.YEAR_MONTH = tgt.YEAR_MONTH
+left join c_absorb asb on asb.mid = mac.mid and asb.YEAR_MONTH = tgt.YEAR_MONTH
+${if(p_calendar=="MACHINE"
+," left join c_standard sth on sth.mid = mac.mid and sth.YEAR_MONTH = tgt.YEAR_MONTH "
+," left join c_standard_holiday sth on sth.mid = mac.mid and sth.YEAR_MONTH = tgt.YEAR_MONTH "
+	)} 
+group by mac.mid, mac.CompEName, mac.MachineNo, mac.MachineName ,mac.ResourceCode ,mac.ResourceName ,mac.CATEGORY1 
+,tgt.YEAR_MONTH
+)
+,c_monthly as (
+select dtl.CompEName, dtl.year_month
+${if(p_dim2="Resource",",dtl.ResourceCode as MachineNo ,dtl.ResourceName as MACHINENAME",  if(p_dim2 = "Category",",isnull(dtl.category1,'Others') as MachineNo ,null as MACHINENAME", ",dtl.MachineNo, dtl.MACHINENAME" ) ) }
+,count(distinct (case when isnull(dtl.STD_HOUR,0) = 0 then null else dtl.mid end)) as mac_cnt, sum(dtl.PLAN_HOUR) as PLAN_HOUR, sum(dtl.ABSORB_HOURS) as ABSORB_HOURS, sum(dtl.STD_HOUR) as STD_HOUR
+from c_detail dtl
+group by dtl.CompEName,dtl.year_month
+${if(p_dim2="Resource",",dtl.ResourceCode ,dtl.ResourceName",  if(p_dim2 = "Category",",isnull(dtl.category1,'Others')", ",dtl.MachineNo, dtl.MACHINENAME" ) ) }
+)
+,c_plan_w as (
+	select MachineNo , CONCAT( DATEPART(YEAR,PLAN_DATE),'WK',RIGHT(100+ DATEPART(WEEK,PLAN_DATE),2)) AS WEEK_NAME, sum(MAC_HOUR) as PLAN_HOUR 
+	from hcpdw.dbo.OPS_FACT_LOADING_PLAN_DETAIL
+	group by  MachineNo , CONCAT( DATEPART(YEAR,PLAN_DATE),'WK',RIGHT(100+ DATEPART(WEEK,PLAN_DATE),2))
+)	
+,c_absorb_w as (
+	select mid, CONCAT( DATEPART(YEAR,CALCDATE),'WK',RIGHT(100+ DATEPART(WEEK,CALCDATE),2)) AS WEEK_NAME, sum(ABSORB_HOURS) as ABSORB_HOURS
+	from HCPDW.DBO.OPS_FACT_MAC_ABSORB_HOUR
+	group by mid, CONCAT( DATEPART(YEAR,CALCDATE),'WK',RIGHT(100+ DATEPART(WEEK,CALCDATE),2))
+)
+,c_standard_w as (
+SELECT sth.MID , CONCAT( DATEPART(YEAR,sth.CALENDAR_DATE),'WK',RIGHT(100+ DATEPART(WEEK,sth.CALENDAR_DATE),2)) AS WEEK_NAME,sum(sth.STD_HOUR) as STD_HOUR
+FROM hcpdw.dbo.OPS_FACT_MAC_STD_HOUR sth
+inner join c_machine mac on mac.mid = sth.mid
+where 1=1
+and (mac.EffectDate is null or mac.EffectDate < sth.CALENDAR_DATE )
+and (mac.DisabledDate is null or mac.DisabledDate > sth.CALENDAR_DATE)
+group by sth.MID, CONCAT( DATEPART(YEAR,sth.CALENDAR_DATE),'WK',RIGHT(100+ DATEPART(WEEK,sth.CALENDAR_DATE),2))
+)
+,c_standard_w_holiday as (
+SELECT mac.MID , CONCAT( DATEPART(YEAR,std.CALENDAR_DATE),'WK',RIGHT(100+ DATEPART(WEEK,std.CALENDAR_DATE),2)) AS WEEK_NAME
+${if(p_calendar=="NO-HOLIDAY"
+,",sum(isnull(sth.OVERRIDE_WORKDAY,24)) as STD_HOUR"
+,",sum(24) as STD_HOUR"
+	)} 
+FROM HCPDW.dbo.DIM_MAN_DEFAULT_CALENDAR std
+left join hcpdw.dbo.DIM_MAN_CALENDAR_EXCEPTIONS sth
+on sth.CALENDAR_CODE = std.CALENDAR_CODE
+		and sth.FACTORY_CODE = std.FACTORY_CODE
+		and sth.OVERRIDE_WORKDAY = 0
+		and sth.CALENDAR_DATE  = std.CALENDAR_DATE
+cross join c_machine mac
+where 1=1
+and (mac.EffectDate is null or mac.EffectDate < std.CALENDAR_DATE )
+and (mac.DisabledDate is null or mac.DisabledDate > std.CALENDAR_DATE)
+group by mac.MID, CONCAT( DATEPART(YEAR,std.CALENDAR_DATE),'WK',RIGHT(100+ DATEPART(WEEK,std.CALENDAR_DATE),2))
+)
+,c_weeks as (
+select 'WEEK_BF' as DATE_TYPE, 'A2' AS DATE_ODB
+,concat(datepart(year,dateadd(week,-spv.[number]A,par.cutoff)),'WK' ,right(100+datepart(week,dateadd(week,-spv.[number]A,par.cutoff)),2)) as COL
+,concat('','WK' ,right(100+datepart(week,dateadd(week,-spv.[number]A,par.cutoff)),2)) as COL_DSP
+from master.dbo.spt_values spv
+cross join c_par par
+where spv.[type]A ='P'
+and spv.[number]A between 1 and par.week_bf
+)
+,c_detail_w as (
+select mac.mid, mac.CompEName, mac.MachineNo, mac.MachineName ,mac.ResourceCode ,mac.ResourceName ,mac.CATEGORY1 
+,wks.COL as WEEK_NAME, sum(pln.PLAN_HOUR) as PLAN_HOUR, sum(asb.ABSORB_HOURS) as ABSORB_HOURS, sum(sth.STD_HOUR) as STD_HOUR
+from c_machine mac
+cross join c_weeks wks
+left join c_plan_W pln on pln.MachineNo = mac.MachineNo and pln.WEEK_NAME = wks.COL
+left join c_absorb_w asb on asb.mid = mac.mid and asb.WEEK_NAME = wks.COL
+${if(p_calendar=="MACHINE"
+," left join c_standard_w sth on sth.mid = mac.mid and sth.WEEK_NAME = wks.COL "
+," left join c_standard_w_holiday sth on sth.mid = mac.mid and sth.WEEK_NAME = wks.COL "
+	)} 
+group by mac.mid, mac.CompEName, mac.MachineNo, mac.MachineName ,mac.ResourceCode ,mac.ResourceName ,mac.CATEGORY1 
+,wks.COL
+)
+,c_weekly as (
+select dtl.CompEName, dtl.WEEK_NAME
+${if(p_dim2="Resource",",dtl.ResourceCode as MachineNo ,dtl.ResourceName as MACHINENAME",  if(p_dim2 = "Category",",isnull(dtl.category1,'Others') as MachineNo ,null as MACHINENAME", ",dtl.MachineNo, dtl.MACHINENAME" ) ) }
+,count(distinct (case when isnull(dtl.STD_HOUR,0) = 0 then null else dtl.mid end)) as mac_cnt, sum(dtl.PLAN_HOUR) as PLAN_HOUR, sum(dtl.ABSORB_HOURS) as ABSORB_HOURS, sum(dtl.STD_HOUR) as STD_HOUR
+from c_detail_w dtl
+group by dtl.CompEName,dtl.WEEK_NAME
+${if(p_dim2="Resource",",dtl.ResourceCode ,dtl.ResourceName",  if(p_dim2 = "Category",",isnull(dtl.category1,'Others')", ",dtl.MachineNo, dtl.MACHINENAME" ) ) }
+)
+,c_main as (
+select dtl.CompEName,dtl.MachineNo, dtl.MachineName ,dtl.year_month ,dtl.mac_cnt ,dtl.PLAN_HOUR ,dtl.ABSORB_HOURS ,dtl.STD_HOUR
+from c_monthly dtl
+union all
+select dtl.CompEName,dtl.MachineNo, dtl.MachineName ,dtl.WEEK_NAME ,dtl.mac_cnt ,dtl.PLAN_HOUR ,dtl.ABSORB_HOURS ,dtl.STD_HOUR
+from c_weekly dtl
+)
+select * from c_main]]></Query>
+<PageQuery>
+<![CDATA[]]></PageQuery>
+</TableData>
+<TableData name="mtd" class="com.fr.data.impl.DBTableData">
+<Parameters>
+<Parameter>
+<Attributes name="p_enddate"/>
+<O>
+<![CDATA[2022-07-18]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_monthbf"/>
+<O>
+<![CDATA[6]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_processes"/>
+<O>
+<![CDATA[涂装]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_dim2"/>
+<O>
+<![CDATA[Resource]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_monthaf"/>
+<O>
+<![CDATA[3]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_weekbf"/>
+<O>
+<![CDATA[4]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_machines"/>
+<O>
+<![CDATA[]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="g_org_code"/>
+<O>
+<![CDATA[ALL]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_factories"/>
+<O>
+<![CDATA[HA1]]></O>
+</Parameter>
+<Parameter>
+<Attributes name="p_calendar"/>
+<O>
+<![CDATA[MACHINE]]></O>
+</Parameter>
+</Parameters>
+<Attributes maxMemRowCount="-1"/>
+<Connection class="com.fr.data.impl.NameDatabaseConnection">
+<DatabaseName>
+<![CDATA[HCP_DW]]></DatabaseName>
+</Connection>
+<Query>
+<![CDATA[with c_par as (select cast('${p_enddate}' as date) as cutoff, cast('${p_monthbf}'as int) as month_bf, cast('${p_weekbf}'as int) as week_bf, cast('${p_monthaf}'as int) as month_af )
+--with c_par as (select cast('2021-03-31' as date) as cutoff, cast('6'as int) as month_bf, cast('4'as int) as week_bf, cast('3'as int) as month_af )
+,c_tgts as (
+select tgt.MID , tgt.OEE_TARGET , rank() over(partition by tgt.MID order by tgt.YEAR_MONTH desc) as rnk
+from hcpdw.dbo.OPS_DIM_MAC_OEE_TARGET tgt
+cross join c_par par
+where 1=1
+and (tgt.YEAR_MONTH between convert(char(7),dateadd(month,-par.month_bf,par.cutoff),23) and convert(char(7),dateadd(month,par.month_af-1,par.cutoff),23) )
+and tgt.OEE_TARGET > 0
+)
+,c_machine as (
+	select mac.MID ,mac.MachineNo ,mac.MachineName 
+	,mac.ResourceCode ,mac.ResourceName ,mac.CATEGORY1 
+	,concat(replace(cmp.CompEName,'1',''),(case when dep.DepName like '%II' THEN 'II' ELSE (CASE WHEN cmp.CompEName IN ('SZ1','HA1') THEN 'I' ELSE '' END) END)) AS NEW_COMP
+	,cmp.CompEName ,loi.ODB  as ORG_ODB, tgt.OEE_TARGET /100 as OEE_TARGET,mac.EffectDate,mac.DisabledDate
+	from hcpdw.dbo.DIM_EPLAN_MACHINE as mac
+	cross join c_par par
+	inner join hcpdw.dbo.DIM_EPLAN_DEPARTMENT as dep on dep.DepID = mac.DepID 
+	inner join hcpdw.dbo.DIM_EPLAN_COMPANY as cmp on cmp.CompID  = mac.CompID 
+	inner join hcpdw.dbo.OPS_DIM_LOADING_ORG_INFO loi on loi.ORGANIZATION_CODE =cmp.CompEName 
+	inner join c_tgts tgt on tgt.mid = mac.MID and tgt.rnk = 1
+	where 1=1
+	and mac.Process is not null
+	and mac.PLANNING_MACHINE = 1
+	and (mac.OEEActiveDate is null or convert(char(7),mac.OEEActiveDate,23) <= convert(char(7),dateadd(month,par.month_af-1,par.cutoff),23) )
+	and (mac.OEEInactiveDate is null or convert(char(7),mac.OEEInactiveDate,23) > convert(char(7),dateadd(month,-par.month_bf,par.cutoff),23) )
+	and (mac.EffectDate is null or convert(char(7),mac.EffectDate,23) <= convert(char(7),dateadd(month,par.month_af-1,par.cutoff),23) )
+	and (mac.DisabledDate is null or convert(char(7),mac.DisabledDate,23) > convert(char(7),dateadd(month,-par.month_bf,par.cutoff),23) )
+	and dep.DepName not in ('外协','Outsourcing')
+${if(find("ALL",g_org_code)>0,"","and cmp.CompEName in ('"+g_org_code+"')")}	
+	${if(len(p_factories)=0,"","and cmp.CompEName in ('"+p_factories+"')")}
+	${if(len(p_processes)=0,"","and mac.Process in ('"+p_processes+"')")}
+	${if(len(p_machines)=0,"","and mac.MachineNo in ('"+p_machines+"')")}
+)
+,c_plan as (
+	select MachineNo , convert(char(7),PLAN_DATE,23) AS YEAR_MONTH, sum(MAC_HOUR) as PLAN_HOUR 
+	from hcpdw.dbo.OPS_FACT_LOADING_PLAN_DETAIL
+	cross join c_par par
+	where convert(char(7),PLAN_DATE,23) = convert(char(7),cutoff,23)
+	and PLAN_DATE <= cutoff
+	group by  MachineNo , convert(char(7),PLAN_DATE,23)
+)
+,c_absorb as (
+	select mid, convert(char(7),CALCDATE,23)  AS YEAR_MONTH, sum(ABSORB_HOURS) as ABSORB_HOURS
+	from HCPDW.DBO.OPS_FACT_MAC_ABSORB_HOUR
+	cross join c_par par
+	where convert(char(7),CALCDATE,23) = convert(char(7),cutoff,23)
+	and CALCDATE <= cutoff
+	group by mid, convert(char(7),CALCDATE,23)  
+)
+,c_standard as (
+SELECT sth.MID , convert(char(7),sth.CALENDAR_DATE ,23)  AS YEAR_MONTH,sum(sth.STD_HOUR) as STD_HOUR
+FROM hcpdw.dbo.OPS_FACT_MAC_STD_HOUR sth
+	cross join c_par par
+inner join c_machine mac on mac.mid = sth.mid	
+	where convert(char(7),sth.CALENDAR_DATE,23) = convert(char(7),par.cutoff,23)
+	and sth.CALENDAR_DATE <= par.cutoff
+and (mac.EffectDate is null or mac.EffectDate < sth.CALENDAR_DATE )
+and (mac.DisabledDate is null or mac.DisabledDate > sth.CALENDAR_DATE)	
+group by sth.MID,convert(char(7),CALENDAR_DATE ,23)
+)
+,c_standard_holiday as (
+SELECT mac.MID , convert(char(7),std.CALENDAR_DATE ,23)  AS YEAR_MONTH
+${if(p_calendar=="NO-HOLIDAY"
+,",sum(isnull(sth.OVERRIDE_WORKDAY,24)) as STD_HOUR"
+,",sum(24) as STD_HOUR"
+	)} 
+FROM HCPDW.dbo.DIM_MAN_DEFAULT_CALENDAR std
+	cross join c_par par
+left join hcpdw.dbo.DIM_MAN_CALENDAR_EXCEPTIONS sth
+on sth.CALENDAR_CODE = std.CALENDAR_CODE
+		and sth.FACTORY_CODE = std.FACTORY_CODE
+		and sth.OVERRIDE_WORKDAY = 0
+		and sth.CALENDAR_DATE  = std.CALENDAR_DATE
+cross join c_machine mac
+where 1=1
+and convert(char(7),std.CALENDAR_DATE,23) = convert(char(7),par.cutoff,23)
+and std.CALENDAR_DATE <= par.cutoff
+and (mac.EffectDate is null or mac.EffectDate < std.CALENDAR_DATE )
+and (mac.DisabledDate is null or mac.DisabledDate > std.CALENDAR_DATE)
+group by mac.MID,convert(char(7),std.CALENDAR_DATE ,23)
+)
+,c_detail as (
+select mac.mid, mac.CompEName, mac.MachineNo, mac.MachineName ,mac.ResourceCode ,mac.ResourceName ,mac.CATEGORY1 
+,tgt.YEAR_MONTH, sum(pln.PLAN_HOUR) as PLAN_HOUR, sum(asb.ABSORB_HOURS) as ABSORB_HOURS, sum(sth.STD_HOUR) as STD_HOUR
+from hcpdw.dbo.OPS_DIM_MAC_OEE_TARGET tgt
+cross join c_par par
+inner join c_machine mac on mac.mid = tgt.mid
+left join c_plan pln on pln.MachineNo = mac.MachineNo and pln.YEAR_MONTH = tgt.YEAR_MONTH
+left join c_absorb asb on asb.mid = mac.mid and asb.YEAR_MONTH = tgt.YEAR_MONTH
+${if(p_calendar=="MACHINE"
+," left join c_standard sth on sth.mid = mac.mid and sth.YEAR_MONTH = tgt.YEAR_MONTH "
+," left join c_standard_holiday sth on sth.mid = mac.mid and sth.YEAR_MONTH = tgt.YEAR_MONTH "
+	)} 
+where tgt.YEAR_MONTH = convert(char(7),cutoff,23)
+group by mac.mid, mac.CompEName, mac.MachineNo, mac.MachineName ,mac.ResourceCode ,mac.ResourceName ,mac.CATEGORY1 
+,tgt.YEAR_MONTH 
+)
+,c_monthly as (
+select dtl.CompEName, dtl.year_month
+${if(p_dim2="Resource",",dtl.ResourceCode as MachineNo ,dtl.ResourceName as MACHINENAME",  if(p_dim2 = "Category",",isnull(dtl.category1,'Others') as MachineNo ,null as MACHINENAME", ",dtl.MachineNo, dtl.MACHINENAME" ) ) }
+,count(distinct (case when isnull(dtl.STD_HOUR,0) = 0 then null else dtl.mid end)) as mac_cnt, sum(dtl.PLAN_HOUR) as PLAN_HOUR, sum(dtl.ABSORB_HOURS) as ABSORB_HOURS, sum(dtl.STD_HOUR) as STD_HOUR
+from c_detail dtl
+group by dtl.CompEName,dtl.year_month
+${if(p_dim2="Resource",",dtl.ResourceCode ,dtl.ResourceName",  if(p_dim2 = "Category",",isnull(dtl.category1,'Others')", ",dtl.MachineNo, dtl.MACHINENAME" ) ) }
+)
+,c_main as (
+select dtl.CompEName,dtl.MachineNo, dtl.MachineName ,dtl.year_month ,dtl.mac_cnt ,dtl.PLAN_HOUR ,dtl.ABSORB_HOURS ,dtl.STD_HOUR
+from c_monthly dtl
+)
+select * from c_main]]></Query>
+<PageQuery>
+<![CDATA[]]></PageQuery>
+</TableData>
+<TableData name="dic_calendar" class="com.fr.data.impl.DBTableData">
+<Parameters/>
+<Attributes maxMemRowCount="-1"/>
+<Connection class="com.fr.data.impl.NameDatabaseConnection">
+<DatabaseName>
+<![CDATA[HCP_DW]]></DatabaseName>
+</Connection>
+<Query>
+<![CDATA[select 'MACHINE' as val, 'by Machine' as dsp
+union all select 'NO-HOLIDAY', 'Excl. Legal Holiday'
+union all select 'EVERYDAY', 'Everyday']]></Query>
+<PageQuery>
+<![CDATA[]]></PageQuery>
+</TableData>
+</TableDataMap>
+<ElementCaseMobileAttr>
+<ElementCaseMobileAttrProvider horizontal="1" vertical="1" zoom="true" refresh="false" isUseHTML="false" isMobileCanvasSize="false" appearRefresh="false" allowFullScreen="false" allowDoubleClickOrZoom="true" functionalWhenUnactivated="false"/>
+</ElementCaseMobileAttr>
+<Report class="com.fr.report.worksheet.WorkSheet" name="sheet1">
+<ReportPageAttr>
+<HR F="0" T="3"/>
+<FR/>
+<HC F="0" T="5"/>
+<FC/>
+<UPFCR COLUMN="true" ROW="true"/>
+</ReportPageAttr>
+<ColumnPrivilegeControl/>
+<RowPrivilegeControl/>
+<RowHeight defaultValue="723900">
+<![CDATA[431800,723900,723900,723900,723900,723900,304800,1008000,723900,723900,723900]]></RowHeight>
+<ColumnWidth defaultValue="2743200">
+<![CDATA[482600,1498600,1498600,2743200,7200000,1651000,1422400,838200,863600,2448000,863600,838200,838200,2448000,863600,812800,838200,863600,863600,2448000,2448000,2448000,939800,2260600,2743200]]></ColumnWidth>
+<CellElementList>
+<C c="0" r="0">
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="7" r="1" cs="4" s="0">
+<O t="DSColumn">
+<Attributes dsName="cols" columnName="COL"/>
+<Condition class="com.fr.data.condition.CommonCondition">
+<CNUMBER>
+<![CDATA[0]]></CNUMBER>
+<CNAME>
+<![CDATA[DATE_TYPE]]></CNAME>
+<Compare op="8">
+<O>
+<![CDATA[BF]]></O>
+</Compare>
+</Condition>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Result>
+<![CDATA[$$$]]></Result>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="0"/>
+<CellPageAttr/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[hide-row]]></Name>
+<Condition class="com.fr.data.condition.ListCondition"/>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.RowHeightHighlightAction"/>
+</Highlight>
+</HighlightList>
+<Expand dir="1" leftParentDefault="false" upParentDefault="false"/>
+</C>
+<C c="11" r="1" cs="4" s="0">
+<O t="DSColumn">
+<Attributes dsName="cols" columnName="COL"/>
+<Condition class="com.fr.data.condition.CommonCondition">
+<CNUMBER>
+<![CDATA[0]]></CNUMBER>
+<CNAME>
+<![CDATA[DATE_TYPE]]></CNAME>
+<Compare op="8">
+<O>
+<![CDATA[AF]]></O>
+</Compare>
+</Condition>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Result>
+<![CDATA[$$$]]></Result>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="0"/>
+<CellPageAttr/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[hide-row]]></Name>
+<Condition class="com.fr.data.condition.ListCondition"/>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.RowHeightHighlightAction"/>
+</Highlight>
+</HighlightList>
+<Expand dir="1" leftParentDefault="false" upParentDefault="false"/>
+</C>
+<C c="2" r="2" rs="2" s="1">
+<O>
+<![CDATA[ORG]]></O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="0"/>
+<CellPageAttr/>
+<Present class="com.fr.base.present.FormulaPresent">
+<Content>
+<![CDATA[=SQL("HCP_DW","select hcpdw.dbo.f_get_report_i18n('" + $reportname + "','" + $$$ + "','" + $lang + "')",1,1 )]]></Content>
+</Present>
+<Expand/>
+</C>
+<C c="3" r="2" rs="2" s="1">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=if( p_dim2 = "Category", "Category", if(p_dim2 = "Machine", "MACHINE", "RESOURCE") + "_NO" )]]></Attributes>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="0"/>
+<CellPageAttr/>
+<Present class="com.fr.base.present.FormulaPresent">
+<Content>
+<![CDATA[=SQL("HCP_DW","select hcpdw.dbo.f_get_report_i18n('" + $reportname + "','" + $$$ + "','" + $lang + "')",1,1 )]]></Content>
+</Present>
+<Expand/>
+</C>
+<C c="4" r="2" rs="2" s="1">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=if( p_dim2 = "Category", "", if(p_dim2 = "Machine", "MACHINE", "RESOURCE") + "_NAME" )]]></Attributes>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="1"/>
+<CellPageAttr/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[hide-col]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="0">
+<O>
+<![CDATA[]]></O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.ColWidthHighlightAction"/>
+</Highlight>
+</HighlightList>
+<Present class="com.fr.base.present.FormulaPresent">
+<Content>
+<![CDATA[=SQL("HCP_DW","select hcpdw.dbo.f_get_report_i18n('" + $reportname + "','" + $$$ + "','" + $lang + "')",1,1 )]]></Content>
+</Present>
+<Expand/>
+</C>
+<C c="5" r="2" rs="2" s="1">
+<O>
+<![CDATA[TARGET]]></O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="0"/>
+<CellPageAttr/>
+<Present class="com.fr.base.present.FormulaPresent">
+<Content>
+<![CDATA[=SQL("HCP_DW","select hcpdw.dbo.f_get_report_i18n('" + $reportname + "','" + $$$ + "','" + $lang + "')",1,1 )]]></Content>
+</Present>
+<Expand/>
+</C>
+<C c="6" r="2" rs="2" s="1">
+<O>
+<![CDATA[SET]]></O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="0"/>
+<CellPageAttr/>
+<Present class="com.fr.base.present.FormulaPresent">
+<Content>
+<![CDATA[=SQL("HCP_DW","select hcpdw.dbo.f_get_report_i18n('" + $reportname + "','" + $$$ + "','" + $lang + "')",1,1 )]]></Content>
+</Present>
+<Expand/>
+</C>
+<C c="7" r="2" cs="4" s="1">
+<O t="DSColumn">
+<Attributes dsName="cols" columnName="COL_DSP"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="0"/>
+<CellPageAttr/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[YELLOW]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[LEFT(H3, 2) = "WK"]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-8684677"/>
+</HighlightAction>
+</Highlight>
+</HighlightList>
+<Expand leftParentDefault="false"/>
+</C>
+<C c="11" r="2" cs="4" s="2">
+<O t="DSColumn">
+<Attributes dsName="cols" columnName="COL_DSP"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="0"/>
+<CellPageAttr/>
+<Expand leftParentDefault="false"/>
+</C>
+<C c="15" r="2" s="3">
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="16" r="2" cs="6" s="2">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=$p_enddate + " MTD"]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand leftParentDefault="false" upParentDefault="false"/>
+</C>
+<C c="7" r="3" s="4">
+<O>
+<![CDATA[吸]]></O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[hide-col]]></Name>
+<Condition class="com.fr.data.condition.ListCondition"/>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.ColWidthHighlightAction"/>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[YELLOW]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[LEFT(H3, 2) = "WK"]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-8684677"/>
+</HighlightAction>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="8" r="3" s="4">
+<O>
+<![CDATA[标]]></O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[hide-col]]></Name>
+<Condition class="com.fr.data.condition.ListCondition"/>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.ColWidthHighlightAction"/>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[YELLOW]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[LEFT(H3, 2) = "WK"]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-8684677"/>
+</HighlightAction>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="9" r="3" s="1">
+<O>
+<![CDATA[UTILIZATION_RATE]]></O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="0"/>
+<CellPageAttr/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[YELLOW]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[LEFT(H3, 2) = "WK"]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-8684677"/>
+</HighlightAction>
+</Highlight>
+</HighlightList>
+<Present class="com.fr.base.present.FormulaPresent">
+<Content>
+<![CDATA[=SQL("HCP_DW","select hcpdw.dbo.f_get_report_i18n('" + $reportname + "','" + $$$ + "','" + $lang + "')",1,1 )]]></Content>
+</Present>
+<Expand/>
+</C>
+<C c="10" r="3" s="1">
+<O>
+<![CDATA[台]]></O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="0"/>
+<CellPageAttr/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[hide-col]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[REVERSE($p_showcnt)]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.ColWidthHighlightAction"/>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[YELLOW]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[LEFT(H3, 2) = "WK"]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-8684677"/>
+</HighlightAction>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="11" r="3" s="5">
+<O>
+<![CDATA[排]]></O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[hide-col]]></Name>
+<Condition class="com.fr.data.condition.ListCondition"/>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.ColWidthHighlightAction"/>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="12" r="3" s="5">
+<O>
+<![CDATA[标]]></O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[hide-col]]></Name>
+<Condition class="com.fr.data.condition.ListCondition"/>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.ColWidthHighlightAction"/>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="13" r="3" s="2">
+<O>
+<![CDATA[LOADING_RATE]]></O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="0"/>
+<CellPageAttr/>
+<Present class="com.fr.base.present.FormulaPresent">
+<Content>
+<![CDATA[=SQL("HCP_DW","select hcpdw.dbo.f_get_report_i18n('" + $reportname + "','" + $$$ + "','" + $lang + "')",1,1 )]]></Content>
+</Present>
+<Expand/>
+</C>
+<C c="14" r="3" s="2">
+<O>
+<![CDATA[台]]></O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="0"/>
+<CellPageAttr/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[hide-col]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[REVERSE($p_showcnt)]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.ColWidthHighlightAction"/>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="15" r="3" s="3">
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="16" r="3" s="5">
+<O>
+<![CDATA[排]]></O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[hide-col]]></Name>
+<Condition class="com.fr.data.condition.ListCondition"/>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.ColWidthHighlightAction"/>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="17" r="3" s="5">
+<O>
+<![CDATA[吸]]></O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[hide-col]]></Name>
+<Condition class="com.fr.data.condition.ListCondition"/>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.ColWidthHighlightAction"/>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="18" r="3" s="5">
+<O>
+<![CDATA[标]]></O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[hide-col]]></Name>
+<Condition class="com.fr.data.condition.ListCondition"/>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.ColWidthHighlightAction"/>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="19" r="3" s="2">
+<O>
+<![CDATA[EXECUTION_RATE]]></O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="0"/>
+<CellPageAttr/>
+<Present class="com.fr.base.present.FormulaPresent">
+<Content>
+<![CDATA[=SQL("HCP_DW","select hcpdw.dbo.f_get_report_i18n('" + $reportname + "','" + $$$ + "','" + $lang + "')",1,1 )]]></Content>
+</Present>
+<Expand/>
+</C>
+<C c="20" r="3" s="2">
+<O>
+<![CDATA[LOADING_RATE]]></O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="0"/>
+<CellPageAttr/>
+<Present class="com.fr.base.present.FormulaPresent">
+<Content>
+<![CDATA[=SQL("HCP_DW","select hcpdw.dbo.f_get_report_i18n('" + $reportname + "','" + $$$ + "','" + $lang + "')",1,1 )]]></Content>
+</Present>
+<Expand/>
+</C>
+<C c="21" r="3" s="2">
+<O>
+<![CDATA[UTILIZATION_RATE]]></O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="0"/>
+<CellPageAttr/>
+<Present class="com.fr.base.present.FormulaPresent">
+<Content>
+<![CDATA[=SQL("HCP_DW","select hcpdw.dbo.f_get_report_i18n('" + $reportname + "','" + $$$ + "','" + $lang + "')",1,1 )]]></Content>
+</Present>
+<Expand/>
+</C>
+<C c="1" r="4">
+<O t="DSColumn">
+<Attributes dsName="macs" columnName="CompEName"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[hide-col]]></Name>
+<Condition class="com.fr.data.condition.ListCondition"/>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.ColWidthHighlightAction"/>
+</Highlight>
+</HighlightList>
+<Expand dir="0"/>
+</C>
+<C c="2" r="4" s="6">
+<O t="DSColumn">
+<Attributes dsName="macs" columnName="DISPLAY_NAME"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="3" r="4" s="6">
+<O t="DSColumn">
+<Attributes dsName="macs" columnName="MachineNo"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper">
+<Attr divideMode="1"/>
+</RG>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="4" r="4" s="7">
+<O t="DSColumn">
+<Attributes dsName="macs" columnName="MACHINENAME"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="0"/>
+<CellPageAttr/>
+<CellInsertPolicy/>
+<Expand dir="0"/>
+</C>
+<C c="5" r="4" s="8">
+<O t="DSColumn">
+<Attributes dsName="macs" columnName="OEE_TARGET"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="0"/>
+<CellPageAttr/>
+<Expand dir="0"/>
+</C>
+<C c="6" r="4" s="9">
+<O t="DSColumn">
+<Attributes dsName="macs" columnName="MAC_CNT"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<CellGUIAttr adjustmode="0"/>
+<CellPageAttr/>
+<Expand dir="0"/>
+</C>
+<C c="7" r="4">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="ABSORB_HOURS"/>
+<Condition class="com.fr.data.condition.ListCondition">
+<JoinCondition join="0">
+<Condition class="com.fr.data.condition.CommonCondition">
+<CNUMBER>
+<![CDATA[0]]></CNUMBER>
+<CNAME>
+<![CDATA[CompEName]]></CNAME>
+<Compare op="0">
+<ColumnRow column="1" row="4"/>
+</Compare>
+</Condition>
+</JoinCondition>
+<JoinCondition join="0">
+<Condition class="com.fr.data.condition.CommonCondition">
+<CNUMBER>
+<![CDATA[0]]></CNUMBER>
+<CNAME>
+<![CDATA[MachineNo]]></CNAME>
+<Compare op="0">
+<ColumnRow column="3" row="4"/>
+</Compare>
+</Condition>
+</JoinCondition>
+<JoinCondition join="0">
+<Condition class="com.fr.data.condition.CommonCondition">
+<CNUMBER>
+<![CDATA[0]]></CNUMBER>
+<CNAME>
+<![CDATA[year_month]]></CNAME>
+<Compare op="0">
+<ColumnRow column="7" row="1"/>
+</Compare>
+</Condition>
+</JoinCondition>
+</Condition>
+<Complex reselect="true"/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Result>
+<![CDATA[$$$]]></Result>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="8" r="4">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="STD_HOUR"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="9" r="4" s="10">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=IF(LEN(I5) = 0 || I5 = 0, NULL, H5 / I5)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[red]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[AND(REVERSE(ISNULL($$$)), $$$ < 0.9 * F5)]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-8459"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[yellow]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=0.9 * F5]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-2080"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[green]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=1.0 * F5]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-1704748"/>
+</HighlightAction>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="10" r="4" s="11">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="mac_cnt"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="11" r="4">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="PLAN_HOUR"/>
+<Condition class="com.fr.data.condition.ListCondition">
+<JoinCondition join="0">
+<Condition class="com.fr.data.condition.CommonCondition">
+<CNUMBER>
+<![CDATA[0]]></CNUMBER>
+<CNAME>
+<![CDATA[CompEName]]></CNAME>
+<Compare op="0">
+<ColumnRow column="1" row="4"/>
+</Compare>
+</Condition>
+</JoinCondition>
+<JoinCondition join="0">
+<Condition class="com.fr.data.condition.CommonCondition">
+<CNUMBER>
+<![CDATA[0]]></CNUMBER>
+<CNAME>
+<![CDATA[MachineNo]]></CNAME>
+<Compare op="0">
+<ColumnRow column="3" row="4"/>
+</Compare>
+</Condition>
+</JoinCondition>
+<JoinCondition join="0">
+<Condition class="com.fr.data.condition.CommonCondition">
+<CNUMBER>
+<![CDATA[0]]></CNUMBER>
+<CNAME>
+<![CDATA[year_month]]></CNAME>
+<Compare op="0">
+<ColumnRow column="11" row="1"/>
+</Compare>
+</Condition>
+</JoinCondition>
+</Condition>
+<Complex reselect="true"/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Result>
+<![CDATA[$$$]]></Result>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0" leftParentDefault="false" left="F5"/>
+</C>
+<C c="12" r="4">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="STD_HOUR"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="13" r="4" s="10">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=IF(LEN(M5) = 0 || M5 = 0, NULL, L5 / M5)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[red]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[AND(REVERSE(ISNULL($$$)), $$$ < 0.9 * F5)]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-8459"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[yellow]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=0.9 * F5]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-2080"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[green]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=1.0 * F5]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-1704748"/>
+</HighlightAction>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="14" r="4" s="11">
+<O t="DSColumn">
+<Attributes dsName="main" columnName="mac_cnt"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="16" r="4">
+<O t="DSColumn">
+<Attributes dsName="mtd" columnName="PLAN_HOUR"/>
+<Condition class="com.fr.data.condition.ListCondition">
+<JoinCondition join="0">
+<Condition class="com.fr.data.condition.CommonCondition">
+<CNUMBER>
+<![CDATA[0]]></CNUMBER>
+<CNAME>
+<![CDATA[CompEName]]></CNAME>
+<Compare op="0">
+<ColumnRow column="1" row="4"/>
+</Compare>
+</Condition>
+</JoinCondition>
+<JoinCondition join="0">
+<Condition class="com.fr.data.condition.CommonCondition">
+<CNUMBER>
+<![CDATA[0]]></CNUMBER>
+<CNAME>
+<![CDATA[MachineNo]]></CNAME>
+<Compare op="0">
+<ColumnRow column="3" row="4"/>
+</Compare>
+</Condition>
+</JoinCondition>
+</Condition>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Result>
+<![CDATA[$$$]]></Result>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0" leftParentDefault="false" left="F5"/>
+</C>
+<C c="17" r="4">
+<O t="DSColumn">
+<Attributes dsName="mtd" columnName="ABSORB_HOURS"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="18" r="4">
+<O t="DSColumn">
+<Attributes dsName="mtd" columnName="STD_HOUR"/>
+<Complex/>
+<RG class="com.fr.report.cell.cellattr.core.group.FunctionGrouper"/>
+<Parameters/>
+</O>
+<PrivilegeControl/>
+<Expand dir="0"/>
+</C>
+<C c="19" r="4" s="10">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=IF(LEN(Q5) = 0 || Q5 = 0, NULL, R5 / Q5)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[red]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[AND(REVERSE(ISNULL($$$)), $$$ < 0.9 * F5)]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-8459"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[yellow]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=0.9 * F5]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-2080"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[green]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=1.0 * F5]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-1704748"/>
+</HighlightAction>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="20" r="4" s="10">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=IF(LEN(S5) = 0 || S5 = 0, NULL, Q5 / S5)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[red]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[AND(REVERSE(ISNULL($$$)), $$$ < 0.9 * F5)]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-8459"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[yellow]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=0.9 * F5]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-2080"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[green]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=1.0 * F5]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-1704748"/>
+</HighlightAction>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="21" r="4" s="10">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=IF(LEN(S5) = 0 || S5 = 0, NULL, R5 / S5)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[red]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[AND(REVERSE(ISNULL($$$)), $$$ < 0.9 * F5)]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-8459"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[yellow]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=0.9 * F5]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-2080"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[green]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=1.0 * F5]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-1704748"/>
+</HighlightAction>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="2" r="5" cs="3" s="12">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=C5 + " Sub Total"]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand leftParentDefault="false" left="C5"/>
+</C>
+<C c="5" r="5" s="8">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=SUM(F5 * G5) / G6]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="6" r="5" s="9">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=sum(G5)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="7" r="5" s="13">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=sum(H5)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="8" r="5" s="13">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=SUM(I5)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="9" r="5" s="14">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=IF(LEN(I6) = 0 || I6 = 0, NULL, H6 / I6)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[red]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[AND(REVERSE(ISNULL($$$)), $$$ < 0.9 * F6)]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-8459"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[yellow]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=0.9 * F6]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-2080"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[green]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=1.0 * F6]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-1704748"/>
+</HighlightAction>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="10" r="5" s="11">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=SUM(K5)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="11" r="5" s="15">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=SUM(L5)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="12" r="5" s="15">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=SUM(M5)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="13" r="5" s="14">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=IF(LEN(M6) = 0 || M6 = 0, NULL, L6 / M6)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[red]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[AND(REVERSE(ISNULL($$$)), $$$ < 0.9 * F6)]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-8459"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[yellow]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=0.9 * F6]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-2080"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[green]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=1.0 * F6]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-1704748"/>
+</HighlightAction>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="14" r="5" s="11">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=SUM(O5)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="16" r="5" s="15">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=sum(Q5)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="17" r="5" s="15">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=sum(R5)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="18" r="5" s="15">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=sum(S5)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="19" r="5" s="14">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=IF(LEN(Q6) = 0 || Q6 = 0, NULL, R6 / Q6)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[red]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[AND(REVERSE(ISNULL($$$)), $$$ < 0.9 * F6)]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-8459"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[yellow]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=0.9 * F6]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-2080"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[green]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=1.0 * F6]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-1704748"/>
+</HighlightAction>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="20" r="5" s="14">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=IF(LEN(S6) = 0 || S6 = 0, NULL, Q6 / S6)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[red]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[AND(REVERSE(ISNULL($$$)), $$$ < 0.9 * F6)]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-8459"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[yellow]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=0.9 * F6]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-2080"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[green]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=1.0 * F6]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-1704748"/>
+</HighlightAction>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="21" r="5" s="14">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=IF(LEN(S6) = 0 || S6 = 0, NULL, R6 / S6)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[red]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[AND(REVERSE(ISNULL($$$)), $$$ < 0.9 * F6)]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-8459"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[yellow]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=0.9 * F6]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-2080"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[green]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=1.0 * F6]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-1704748"/>
+</HighlightAction>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="22" r="5" s="16">
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="2" r="6">
+<PrivilegeControl/>
+<Expand leftParentDefault="false" left="C5"/>
+</C>
+<C c="13" r="6" s="17">
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="19" r="6" s="17">
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="20" r="6" s="17">
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="21" r="6" s="17">
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="2" r="7" cs="3" s="18">
+<O>
+<![CDATA[Grand Total]]></O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="5" r="7" s="19">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=SUM(F5 * G5) / G8]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="6" r="7" s="20">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=sum(G5)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="7" r="7" s="13">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=sum(H5)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="8" r="7" s="13">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=SUM(I5)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="9" r="7" s="14">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=IF(LEN(I8) = 0 || I8 = 0, NULL, H8 / I8)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[red]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[AND(REVERSE(ISNULL($$$)), $$$ < 0.9 * F8)]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-8459"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[yellow]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=0.9 * F8]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-2080"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[green]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=1.0 * F8]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-1704748"/>
+</HighlightAction>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="10" r="7" s="11">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=SUM(K5)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="11" r="7" s="15">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=SUM(L5)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="12" r="7" s="15">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=SUM(M5)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="13" r="7" s="14">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=IF(LEN(M8) = 0 || M8 = 0, NULL, L8 / M8)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[red]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[AND(REVERSE(ISNULL($$$)), $$$ < 0.9 * F8)]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-8459"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[yellow]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=0.9 * F8]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-2080"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[green]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=1.0 * F8]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-1704748"/>
+</HighlightAction>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="14" r="7" s="11">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=SUM(O5)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="16" r="7" s="15">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=sum(Q5)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="17" r="7" s="15">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=sum(R5)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="18" r="7" s="15">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=sum(S5)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<Expand/>
+</C>
+<C c="19" r="7" s="14">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=IF(LEN(Q8) = 0 || Q8 = 0, NULL, R8 / Q8)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[red]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[AND(REVERSE(ISNULL($$$)), $$$ < 0.9 * F8)]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-8459"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[yellow]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=0.9 * F8]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-2080"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[green]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=1.0 * F8]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-1704748"/>
+</HighlightAction>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="20" r="7" s="14">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=IF(LEN(S8) = 0 || S8 = 0, NULL, Q8 / S8)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[red]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[AND(REVERSE(ISNULL($$$)), $$$ < 0.9 * F8)]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-8459"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[yellow]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=0.9 * F8]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-2080"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[green]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=1.0 * F8]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-1704748"/>
+</HighlightAction>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="21" r="7" s="14">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=IF(LEN(S8) = 0 || S8 = 0, NULL, R8 / S8)]]></Attributes>
+</O>
+<PrivilegeControl/>
+<HighlightList>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[red]]></Name>
+<Condition class="com.fr.data.condition.FormulaCondition">
+<Formula>
+<![CDATA[AND(REVERSE(ISNULL($$$)), $$$ < 0.9 * F8)]]></Formula>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-8459"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[yellow]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=0.9 * F8]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-2080"/>
+</HighlightAction>
+</Highlight>
+<Highlight class="com.fr.report.cell.cellattr.highlight.DefaultHighlight">
+<Name>
+<![CDATA[green]]></Name>
+<Condition class="com.fr.data.condition.ObjectCondition">
+<Compare op="3">
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=1.0 * F8]]></Attributes>
+</O>
+</Compare>
+</Condition>
+<HighlightAction class="com.fr.report.cell.cellattr.highlight.BackgroundHighlightAction">
+<Background name="ColorBackground" color="-1704748"/>
+</HighlightAction>
+</Highlight>
+</HighlightList>
+<Expand/>
+</C>
+<C c="22" r="8" s="16">
+<PrivilegeControl/>
+<Expand/>
+</C>
+</CellElementList>
+<ReportAttrSet>
+<ReportSettings shrinkToFitMode="2" headerHeight="0" footerHeight="0">
+<PaperSetting>
+<Margin top="986400" left="2743200" bottom="986400" right="2743200"/>
+</PaperSetting>
+<Background name="ColorBackground" color="-1"/>
+</ReportSettings>
+<Header reportPageType="0">
+<Background name="NullBackground"/>
+<LeftList/>
+<CenterList/>
+<RightList/>
+</Header>
+<Footer reportPageType="0">
+<Background name="NullBackground"/>
+<LeftList/>
+<CenterList/>
+<RightList/>
+</Footer>
+</ReportAttrSet>
+<PrivilegeControl/>
+</Report>
+<ReportParameterAttr>
+<Attributes showWindow="true" delayPlaying="true" windowPosition="1" align="0" useParamsTemplate="true" currentIndex="4"/>
+<PWTitle>
+<![CDATA[参数]]></PWTitle>
+<ParameterUI class="com.fr.form.main.parameter.FormParameterUI">
+<Parameters/>
+<Layout class="com.fr.form.ui.container.WParameterLayout">
+<WidgetName name="para"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="0.0" description="">
+<MobileBookMark useBookMark="true" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Margin top="0" left="0" bottom="0" right="0"/>
+<Border>
+<border style="0" color="-723724" borderRadius="0" type="0" borderStyle="0"/>
+<WidgetTitle>
+<O>
+<![CDATA[新建标题]]></O>
+<FRFont name="SimSun" style="0" size="72"/>
+<Position pos="0"/>
+</WidgetTitle>
+<Alpha alpha="1.0"/>
+</Border>
+<Background name="ColorBackground" color="-526086"/>
+<LCAttr vgap="0" hgap="0" compInterval="0"/>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.Label">
+<WidgetName name="Labelp_orgs_c_c_c_c_c_c_c_c_c_c"/>
+<LabelName name="=SQL(&quot;HCP_DW&quot;,&quot;select hcpdw.dbo.f_get_report_i18n(&apos;&quot; + $reportname + &quot;&apos;,&apos;&quot; + &quot;MAC_HOUR_SUM_LABEL_4&quot; + &quot;&apos;,&apos;&quot; + $lang + &quot;&apos;)&quot;,1,1 ) + &quot;&quot;"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="0.0" description="">
+<MobileBookMark useBookMark="true" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<widgetValue>
+<O>
+<![CDATA[Calendar:]]></O>
+</widgetValue>
+<LabelAttr verticalcenter="true" textalign="4" autoline="true"/>
+<FRFont name="微软雅黑" style="0" size="72"/>
+<border style="0" color="-723724"/>
+</InnerWidget>
+<BoundsAttr x="471" y="37" width="64" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.ComboBox">
+<WidgetName name="p_calendar"/>
+<LabelName name="Calendar:"/>
+<WidgetID widgetID="96a42955-ced6-49d0-8761-66919366669f"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="false" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="val" viName="dsp"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[dic_calendar]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+<widgetValue>
+<O>
+<![CDATA[MACHINE]]></O>
+</widgetValue>
+</InnerWidget>
+<BoundsAttr x="535" y="37" width="100" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.RadioGroup">
+<WidgetName name="p_dim2"/>
+<LabelName name="汇总: "/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="0.0" description="">
+<MobileBookMark useBookMark="true" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="DIM" viName="DIM"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[DIC_DIMS2]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+<widgetValue>
+<O>
+<![CDATA[Resource]]></O>
+</widgetValue>
+<MaxRowsMobileAttr maxShowRows="5"/>
+</InnerWidget>
+<BoundsAttr x="501" y="8" width="244" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.Label">
+<WidgetName name="Labelp_orgs_c_c_c_c_c_c_c_c_c"/>
+<LabelName name="工艺: "/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="0.0" description="">
+<MobileBookMark useBookMark="true" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<widgetValue>
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=SQL("HCP_DW","select hcpdw.dbo.f_get_report_i18n('" + $reportname + "','" + "SUM_BY" + "','" + $lang + "')",1,1 ) + ": "]]></Attributes>
+</O>
+</widgetValue>
+<LabelAttr verticalcenter="true" textalign="4" autoline="true"/>
+<FRFont name="微软雅黑" style="0" size="72"/>
+<border style="0" color="-723724"/>
+</InnerWidget>
+<BoundsAttr x="442" y="8" width="59" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.Label">
+<WidgetName name="Labelp_orgs_c_c_c_c"/>
+<LabelName name="工艺: "/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="0.0" description="">
+<MobileBookMark useBookMark="true" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<widgetValue>
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=SQL("HCP_DW","select hcpdw.dbo.f_get_report_i18n('" + $reportname + "','" + "CUTOFF_DATE" + "','" + $lang + "')",1,1 ) + ": "]]></Attributes>
+</O>
+</widgetValue>
+<LabelAttr verticalcenter="true" textalign="4" autoline="true"/>
+<FRFont name="微软雅黑" style="0" size="72"/>
+<border style="0" color="-723724"/>
+</InnerWidget>
+<BoundsAttr x="0" y="8" width="84" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.DateEditor">
+<WidgetName name="p_enddate"/>
+<LabelName name="截止日期: "/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="0.0" description="">
+<MobileBookMark useBookMark="true" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<DateAttr/>
+<widgetValue>
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=today()-1]]></Attributes>
+</O>
+</widgetValue>
+</InnerWidget>
+<BoundsAttr x="84" y="8" width="100" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.Label">
+<WidgetName name="label0_c_c_c"/>
+<LabelName name="个月及最近"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="0.0" description="">
+<MobileBookMark useBookMark="true" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<widgetValue>
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=SQL("HCP_DW","select hcpdw.dbo.f_get_report_i18n('" + $reportname + "','" + "MAC_HOUR_SUM_LABEL_4" + "','" + $lang + "')",1,1 ) + ""]]></Attributes>
+</O>
+</widgetValue>
+<LabelAttr verticalcenter="true" textalign="0" autoline="true"/>
+<FRFont name="微软雅黑" style="0" size="72"/>
+<border style="0" color="-723724"/>
+</InnerWidget>
+<BoundsAttr x="367" y="37" width="95" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.NumberEditor">
+<WidgetName name="p_monthaf"/>
+<LabelName name="周的利用率以及未来"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="0.0" description="">
+<MobileBookMark useBookMark="true" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<NumberAttr allowDecimals="false" allowNegative="false" minValue="1.0">
+<widgetValue>
+<O t="D">
+<![CDATA[3.0]]></O>
+</widgetValue>
+</NumberAttr>
+</InnerWidget>
+<BoundsAttr x="345" y="37" width="22" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.Label">
+<WidgetName name="label0_c_c"/>
+<LabelName name="个月及最近"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="-1.0" description="">
+<MobileBookMark useBookMark="true" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<widgetValue>
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=SQL("HCP_DW","select hcpdw.dbo.f_get_report_i18n('" + $reportname + "','" + "MAC_HOUR_SUM_LABEL_3" + "','" + $lang + "')",1,1 ) + ""]]></Attributes>
+</O>
+</widgetValue>
+<LabelAttr verticalcenter="true" textalign="0" autoline="true"/>
+<FRFont name="微软雅黑" style="0" size="72"/>
+<border style="0" color="-723724"/>
+</InnerWidget>
+<BoundsAttr x="215" y="37" width="130" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.NumberEditor">
+<WidgetName name="p_weekbf"/>
+<LabelName name="个月、最近"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="0.0" description="">
+<MobileBookMark useBookMark="true" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<NumberAttr allowDecimals="false" allowNegative="false" minValue="1.0">
+<widgetValue>
+<O t="D">
+<![CDATA[4.0]]></O>
+</widgetValue>
+</NumberAttr>
+</InnerWidget>
+<BoundsAttr x="193" y="37" width="22" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.NumberEditor">
+<WidgetName name="p_monthbf"/>
+<LabelName name="显示过去"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="0.0" description="">
+<MobileBookMark useBookMark="true" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<NumberAttr allowDecimals="false" allowNegative="false" minValue="1.0">
+<widgetValue>
+<O t="D">
+<![CDATA[3.0]]></O>
+</widgetValue>
+</NumberAttr>
+</InnerWidget>
+<BoundsAttr x="100" y="37" width="22" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.Label">
+<WidgetName name="label0_c"/>
+<LabelName name="显示过去"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="0.0" description="">
+<MobileBookMark useBookMark="true" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<widgetValue>
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=SQL("HCP_DW","select hcpdw.dbo.f_get_report_i18n('" + $reportname + "','" + "MAC_HOUR_SUM_LABEL_2" + "','" + $lang + "')",1,1 ) + ""]]></Attributes>
+</O>
+</widgetValue>
+<LabelAttr verticalcenter="true" textalign="0" autoline="true"/>
+<FRFont name="微软雅黑" style="0" size="72"/>
+<border style="0" color="-723724"/>
+</InnerWidget>
+<BoundsAttr x="122" y="37" width="71" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.Label">
+<WidgetName name="label0"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="0.0" description="">
+<MobileBookMark useBookMark="true" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<widgetValue>
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=SQL("HCP_DW","select hcpdw.dbo.f_get_report_i18n('" + $reportname + "','" + "MAC_HOUR_SUM_LABEL_1" + "','" + $lang + "')",1,1 ) + ""]]></Attributes>
+</O>
+</widgetValue>
+<LabelAttr verticalcenter="true" textalign="4" autoline="true"/>
+<FRFont name="微软雅黑" style="0" size="72"/>
+<border style="0" color="-723724"/>
+</InnerWidget>
+<BoundsAttr x="8" y="37" width="92" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.parameter.FormSubmitButton">
+<WidgetName name="formSubmit0"/>
+<LabelName name="显示过去"/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="0.0" description="">
+<MobileBookMark useBookMark="true" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<Text>
+<![CDATA[Search]]></Text>
+<Hotkeys>
+<![CDATA[enter]]></Hotkeys>
+</InnerWidget>
+<BoundsAttr x="665" y="37" width="80" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.ComboCheckBox">
+<WidgetName name="p_factories"/>
+<LabelName name="工厂: "/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="0.0" description="">
+<MobileBookMark useBookMark="true" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<allowBlank>
+<![CDATA[false]]></allowBlank>
+<DirectEdit>
+<![CDATA[false]]></DirectEdit>
+<CustomData>
+<![CDATA[false]]></CustomData>
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="ORGANIZATION_CODE" viName="DISPLAY_NAME"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[DIC_FACTORIES]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+<widgetValue>
+<O>
+<![CDATA[]]></O>
+</widgetValue>
+<RAAttr delimiter="&apos;,&apos;" isArray="false"/>
+</InnerWidget>
+<BoundsAttr x="233" y="8" width="80" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.Label">
+<WidgetName name="Labelp_orgs_c_c_c"/>
+<LabelName name="工艺: "/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="0.0" description="">
+<MobileBookMark useBookMark="true" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<widgetValue>
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=SQL("HCP_DW","select hcpdw.dbo.f_get_report_i18n('" + $reportname + "','" + "ORG" + "','" + $lang + "')",1,1 ) + ": "]]></Attributes>
+</O>
+</widgetValue>
+<LabelAttr verticalcenter="true" textalign="4" autoline="true"/>
+<FRFont name="微软雅黑" style="0" size="72"/>
+<border style="0" color="-723724"/>
+</InnerWidget>
+<BoundsAttr x="184" y="8" width="49" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.ComboCheckBox">
+<WidgetName name="p_processes"/>
+<LabelName name="工艺: "/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="0.0" description="">
+<MobileBookMark useBookMark="true" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<allowBlank>
+<![CDATA[false]]></allowBlank>
+<DirectEdit>
+<![CDATA[false]]></DirectEdit>
+<CustomData>
+<![CDATA[false]]></CustomData>
+<Dictionary class="com.fr.data.impl.TableDataDictionary">
+<FormulaDictAttr kiName="Process" viName="Process"/>
+<TableDataDictAttr>
+<TableData class="com.fr.data.impl.NameTableData">
+<Name>
+<![CDATA[DIC_PROCESSES]]></Name>
+</TableData>
+</TableDataDictAttr>
+</Dictionary>
+<widgetValue>
+<O>
+<![CDATA[]]></O>
+</widgetValue>
+<RAAttr delimiter="&apos;,&apos;" isArray="false"/>
+</InnerWidget>
+<BoundsAttr x="360" y="8" width="82" height="21"/>
+</Widget>
+<Widget class="com.fr.form.ui.container.WAbsoluteLayout$BoundsWidget">
+<InnerWidget class="com.fr.form.ui.Label">
+<WidgetName name="Labelp_processes_c_c_c"/>
+<LabelName name="工厂: "/>
+<WidgetAttr aspectRatioLocked="false" aspectRatioBackup="0.0" description="">
+<MobileBookMark useBookMark="true" bookMarkName="" frozen="false" index="-1" oldWidgetName=""/>
+<PrivilegeControl/>
+</WidgetAttr>
+<widgetValue>
+<O t="XMLable" class="com.fr.base.Formula">
+<Attributes>
+<![CDATA[=SQL("HCP_DW","select hcpdw.dbo.f_get_report_i18n('" + $reportname + "','" + "PROCESS" + "','" + $lang + "')",1,1 ) + ": "]]></Attributes>
+</O>
+</widgetValue>
+<LabelAttr verticalcenter="true" textalign="4" autoline="true"/>
+<FRFont name="微软雅黑" style="0" size="72"/>
+<border style="0" color="-723724"/>
+</InnerWidget>
+<BoundsAttr x="316" y="8" width="47" height="21"/>
+</Widget>
+<ShowBookmarks showBookmarks="true"/>
+<Sorted sorted="false"/>
+<MobileWidgetList>
+<Widget widgetName="p_enddate"/>
+<Widget widgetName="p_factories"/>
+<Widget widgetName="p_processes"/>
+<Widget widgetName="p_dim2"/>
+<Widget widgetName="p_monthbf"/>
+<Widget widgetName="p_weekbf"/>
+<Widget widgetName="p_monthaf"/>
+<Widget widgetName="p_calendar"/>
+<Widget widgetName="formSubmit0"/>
+</MobileWidgetList>
+<FrozenWidgets/>
+<MobileBookMarkStyle class="com.fr.form.ui.mobile.impl.DefaultMobileBookMarkStyle"/>
+<Display display="true"/>
+<DelayDisplayContent delay="true"/>
+<UseParamsTemplate use="true"/>
+<Position position="0"/>
+<Design_Width design_width="746"/>
+<NameTagModified>
+<TagModified tag="p_processes" modified="true"/>
+<TagModified tag="p_monthbf" modified="true"/>
+<TagModified tag="p_enddate" modified="true"/>
+<TagModified tag="formSubmit0" modified="true"/>
+<TagModified tag="p_dim2" modified="true"/>
+<TagModified tag="p_calendar_c" modified="true"/>
+<TagModified tag="p_monthaf" modified="true"/>
+<TagModified tag="p_weekbf" modified="true"/>
+<TagModified tag="p_factories" modified="true"/>
+</NameTagModified>
+<WidgetNameTagMap>
+<NameTag name="p_processes" tag="工艺: "/>
+<NameTag name="p_monthbf" tag="显示过去"/>
+<NameTag name="p_enddate" tag="截止日期: "/>
+<NameTag name="formSubmit0" tag="显示过去"/>
+<NameTag name="p_dim2" tag="汇总: "/>
+<NameTag name="p_calendar_c" tag="Calendar:"/>
+<NameTag name="p_monthaf" tag="周的利用率以及未来"/>
+<NameTag name="p_weekbf" tag="个月、最近"/>
+<NameTag name="p_factories" tag="工厂: "/>
+</WidgetNameTagMap>
+<ParamAttr class="com.fr.report.mobile.DefaultMobileParamStyle"/>
+<ParamStyle class="com.fr.report.mobile.EmptyMobileParamStyle"/>
+</Layout>
+<DesignAttr width="746" height="63"/>
+</ParameterUI>
+<Parameter>
+<Attributes name="p_showcnt"/>
+<O t="B">
+<![CDATA[false]]></O>
+</Parameter>
+</ReportParameterAttr>
+<StyleList>
+<Style horizontal_alignment="0" imageLayout="1">
+<FRFont name="SimSun" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border/>
+</Style>
+<Style horizontal_alignment="0" imageLayout="1">
+<FRFont name="微软雅黑" style="0" size="72" foreground="-1"/>
+<Background name="ColorBackground" color="-14606047"/>
+<Border>
+<Top style="1" color="-1"/>
+<Bottom style="1" color="-1"/>
+<Left style="1" color="-1"/>
+<Right style="1" color="-1"/>
+</Border>
+</Style>
+<Style horizontal_alignment="0" imageLayout="1">
+<FRFont name="微软雅黑" style="0" size="72" foreground="-1"/>
+<Background name="ColorBackground" color="-12299158"/>
+<Border>
+<Top style="1" color="-1"/>
+<Bottom style="1" color="-1"/>
+<Left style="1" color="-1"/>
+<Right style="1" color="-1"/>
+</Border>
+</Style>
+<Style imageLayout="1">
+<FRFont name="微软雅黑" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border/>
+</Style>
+<Style imageLayout="1">
+<FRFont name="SimSun" style="0" size="72" foreground="-1"/>
+<Background name="ColorBackground" color="-14606047"/>
+<Border>
+<Top style="1" color="-1"/>
+<Bottom style="1" color="-1"/>
+<Left style="1" color="-1"/>
+<Right style="1" color="-1"/>
+</Border>
+</Style>
+<Style imageLayout="1">
+<FRFont name="SimSun" style="0" size="72" foreground="-1"/>
+<Background name="ColorBackground" color="-12299158"/>
+<Border>
+<Top style="1" color="-1"/>
+<Bottom style="1" color="-1"/>
+<Left style="1" color="-1"/>
+<Right style="1" color="-1"/>
+</Border>
+</Style>
+<Style horizontal_alignment="2" imageLayout="1">
+<FRFont name="微软雅黑" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border>
+<Top style="1" color="-3355444"/>
+<Bottom style="1" color="-3355444"/>
+<Left style="1" color="-3355444"/>
+<Right style="1" color="-3355444"/>
+</Border>
+</Style>
+<Style horizontal_alignment="2" textStyle="1" imageLayout="1">
+<FRFont name="微软雅黑" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border>
+<Top style="1" color="-3355444"/>
+<Bottom style="1" color="-3355444"/>
+<Left style="1" color="-3355444"/>
+<Right style="1" color="-3355444"/>
+</Border>
+</Style>
+<Style horizontal_alignment="4" imageLayout="1">
+<Format class="com.fr.base.CoreDecimalFormat" roundingMode="6">
+<![CDATA[#0.0%]]></Format>
+<FRFont name="微软雅黑" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border>
+<Top style="1" color="-3355444"/>
+<Bottom style="1" color="-3355444"/>
+<Left style="1" color="-3355444"/>
+<Right style="1" color="-3355444"/>
+</Border>
+</Style>
+<Style horizontal_alignment="4" imageLayout="1">
+<Format class="com.fr.base.CoreDecimalFormat" roundingMode="6">
+<![CDATA[#,##0]]></Format>
+<FRFont name="微软雅黑" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border>
+<Top style="1" color="-3355444"/>
+<Bottom style="1" color="-3355444"/>
+<Left style="1" color="-3355444"/>
+<Right style="1" color="-3355444"/>
+</Border>
+</Style>
+<Style horizontal_alignment="4" imageLayout="1">
+<Format class="com.fr.base.CoreDecimalFormat" roundingMode="6">
+<![CDATA[#0%]]></Format>
+<FRFont name="微软雅黑" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border>
+<Top style="1" color="-3355444"/>
+<Bottom style="1" color="-3355444"/>
+<Left style="1" color="-3355444"/>
+<Right style="1" color="-3355444"/>
+</Border>
+</Style>
+<Style horizontal_alignment="4" imageLayout="1">
+<FRFont name="微软雅黑" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border>
+<Top style="1" color="-3355444"/>
+<Bottom style="1" color="-3355444"/>
+<Left style="1" color="-3355444"/>
+<Right style="1" color="-3355444"/>
+</Border>
+</Style>
+<Style horizontal_alignment="2" imageLayout="1" paddingLeft="10">
+<FRFont name="微软雅黑" style="1" size="72"/>
+<Background name="NullBackground"/>
+<Border>
+<Top style="1" color="-3355444"/>
+<Bottom style="1" color="-3355444"/>
+<Left style="1" color="-3355444"/>
+<Right style="1" color="-3355444"/>
+</Border>
+</Style>
+<Style imageLayout="1">
+<FRFont name="SimSun" style="1" size="72"/>
+<Background name="NullBackground"/>
+<Border>
+<Top style="1" color="-3355444"/>
+<Bottom style="1" color="-3355444"/>
+<Left style="1" color="-3355444"/>
+<Right style="1" color="-3355444"/>
+</Border>
+</Style>
+<Style horizontal_alignment="4" imageLayout="1">
+<Format class="com.fr.base.CoreDecimalFormat" roundingMode="6">
+<![CDATA[#0%]]></Format>
+<FRFont name="微软雅黑" style="1" size="72"/>
+<Background name="NullBackground"/>
+<Border>
+<Top style="1" color="-3355444"/>
+<Bottom style="1" color="-3355444"/>
+<Left style="1" color="-3355444"/>
+<Right style="1" color="-3355444"/>
+</Border>
+</Style>
+<Style imageLayout="1">
+<FRFont name="SimSun" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border>
+<Top style="1" color="-3355444"/>
+<Bottom style="1" color="-3355444"/>
+<Left style="1" color="-3355444"/>
+<Right style="1" color="-3355444"/>
+</Border>
+</Style>
+<Style imageLayout="1">
+<FRFont name="SimSun" style="1" size="72"/>
+<Background name="NullBackground"/>
+<Border/>
+</Style>
+<Style imageLayout="1">
+<Format class="com.fr.base.CoreDecimalFormat" roundingMode="6">
+<![CDATA[#0%]]></Format>
+<FRFont name="SimSun" style="0" size="72"/>
+<Background name="NullBackground"/>
+<Border/>
+</Style>
+<Style imageLayout="1" paddingLeft="10">
+<FRFont name="微软雅黑" style="1" size="88"/>
+<Background name="NullBackground"/>
+<Border>
+<Top style="1" color="-3355444"/>
+<Bottom style="1" color="-3355444"/>
+<Left style="1" color="-3355444"/>
+<Right style="1" color="-3355444"/>
+</Border>
+</Style>
+<Style horizontal_alignment="4" imageLayout="1">
+<Format class="com.fr.base.CoreDecimalFormat" roundingMode="6">
+<![CDATA[#0.0%]]></Format>
+<FRFont name="微软雅黑" style="1" size="72"/>
+<Background name="NullBackground"/>
+<Border>
+<Top style="1" color="-3355444"/>
+<Bottom style="1" color="-3355444"/>
+<Left style="1" color="-3355444"/>
+<Right style="1" color="-3355444"/>
+</Border>
+</Style>
+<Style horizontal_alignment="4" imageLayout="1">
+<Format class="com.fr.base.CoreDecimalFormat" roundingMode="6">
+<![CDATA[#,##0]]></Format>
+<FRFont name="微软雅黑" style="1" size="72"/>
+<Background name="NullBackground"/>
+<Border>
+<Top style="1" color="-3355444"/>
+<Bottom style="1" color="-3355444"/>
+<Left style="1" color="-3355444"/>
+<Right style="1" color="-3355444"/>
+</Border>
+</Style>
+</StyleList>
+<DesignerVersion DesignerVersion="KAA"/>
+<PreviewType PreviewType="2"/>
+<TemplateIdAttMark class="com.fr.base.iofile.attr.TemplateIdAttrMark">
+<TemplateIdAttMark TemplateId="190ff259-f87f-4628-aae2-c21af9e7be06"/>
+</TemplateIdAttMark>
+<TemplateCloudInfoAttrMark class="com.fr.plugin.cloud.analytics.attr.TemplateInfoAttrMark" pluginID="com.fr.plugin.cloud.analytics.v10" plugin-version="2.14.0.20230222">
+<TemplateCloudInfoAttrMark createTime="1632810016429"/>
+</TemplateCloudInfoAttrMark>
+</WorkBook>
