@@ -1,23 +1,62 @@
 # ETL
+Project ETL is a bundle collection of data extraction, translation and loading solutions, along with visualization and monitoring tools to work with.
 How different ETL approaches work.
 
-## KETTLE
-Do not want to use kettle more.
+## Installation
 
-## MSSQL with link server
+Use git to clone the latest source code.
 
-## Talend Studio
+```bash
+# using git
+git clone https://github.com/jxiang168/ETL
 
-## DataX(TBD)
+# or with github official CLI
+# gh repo clone jxiang168/ETL
+```
 
-## Design Pattern
-Design schema for the projects.
+You may required to download your own softwares or components like:
 
-## Fine Report
-Mapping manipulate screens.
+- mssql: https://www.microsoft.com/zh-cn/sql-server/sql-server-downloads
+- finereport: https://www.finereport.com/product/download
+- KETTLE: https://pentaho.com/pentaho-community-edition/
 
-## Metabase
+
+## Usage
+
+1. Run MSSQL/create_table.sql and create_procedure.sql to create the required tables and procedures.
+2. Refer to scripts in MSSQL/Data to composite your own ETL scripts.
+3. Open your finereport instance, and import  .cpt template file in FineReport folder. Set the datasource to your own MSSQL instance, and run the reports on your Finereport instance.
+
+
+## Full Category of the project
+
+### Design
+Schemas for the projects.
+
+### KETTLE (Deprecated)
+Only for reference and backward compatiblility.
+
+### MSSQL
+A fast, link server based solution for internal safe network environment.
+
+### DataX(TBD)
+For linux platforms in the future.
+
+### FineReport
+Mapping manipulate, ETL configuration and monitoring screens.
+
+### Metabase(TBD)
 A opensource BI product to visualize data.
 
-## Kafka
+### Kafka(TBD)
 A distributed message queue that can be used for synchronizing data between databases.
+
+## Contributing
+
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+Please make sure to update tests as appropriate.
+
+## License
+
+[Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
