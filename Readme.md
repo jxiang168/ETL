@@ -57,6 +57,15 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 Please make sure to update tests as appropriate.
 
+## Code of conduct
+
+- Be friendly and patient.
+- Be welcoming.
+- Be considerate. 
+- Be respectful.
+- Be careful in the words that you choose. 
+- When we disagree, try to understand why.
+
 ## License
 
 [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
