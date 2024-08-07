@@ -1,6 +1,7 @@
-# ETL
+# Project ETL
 Project ETL is a bundle collection of data extraction, translation and loading solutions, along with visualization and monitoring tools to work with.
-How different ETL approaches work.
+
+It is simple, handy and fast solutions, but will be volerable on internet. Please consider your own security measures.
 
 ## Installation
 
