@@ -52,6 +52,9 @@ A opensource BI product to visualize data.
 ### Kafka(TBD)
 A distributed message queue that can be used for synchronizing data between databases.
 
+### Python
+Add some automation to ease work of testing.
+
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
